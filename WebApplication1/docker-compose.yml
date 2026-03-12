@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  # ─── SQL Server ─────────────────────────────────────────
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      SA_PASSWORD: "Password123!"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+
+  # ─── UserService ────────────────────────────────────────
+  user-service:
+    build:
+      context: ./UserService
+      dockerfile: Dockerfile
+    ports:
+      - "5001:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=UserServiceDb;User Id=sa;Password=Password123!;TrustServerCertificate=True
+      - Jwt__Key=SuperSecretKey_ItMustBe32CharactersLong!
+      - Jwt__Issuer=MyMicroservices
+      - Jwt__Audience=MyMicroservicesClient
+    depends_on:
+      - sqlserver
+
+  # ─── ProductService ─────────────────────────────────────
+  product-service:
+    build:
+      context: ./ProductService
+      dockerfile: Dockerfile
+    ports:
+      - "5003:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=ProductServiceDb;User Id=sa;Password=Password123!;TrustServerCertificate=True
+      - Jwt__Key=SuperSecretKey_ItMustBe32CharactersLong!
+      - Jwt__Issuer=MyMicroservices
+      - Jwt__Audience=MyMicroservicesClient
+    depends_on:
+      - sqlserver
+
+  # ─── OrderService ───────────────────────────────────────
+  order-service:
+    build:
+      context: ./OrderService
+      dockerfile: Dockerfile
+    ports:
+      - "5002:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=OrderServiceDb;User Id=sa;Password=Password123!;TrustServerCertificate=True
+      - Services__UserService=http://user-service:8080
+      - Services__ProductService=http://product-service:8080
+      - Jwt__Key=SuperSecretKey_ItMustBe32CharactersLong!
+      - Jwt__Issuer=MyMicroservices
+      - Jwt__Audience=MyMicroservicesClient
+    depends_on:
+      - sqlserver
+      - user-service
+      - product-service
+
+  # ─── API Gateway ────────────────────────────────────────
+  api-gateway:
+    build:
+      context: ./ApiGateway
+      dockerfile: Dockerfile
+    ports:
+      - "5000:8080"
+    depends_on:
+      - user-service
+      - order-service
+      - product-service
+
+volumes:
+  sqlserver_data:
