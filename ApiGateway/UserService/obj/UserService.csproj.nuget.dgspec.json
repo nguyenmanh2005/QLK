@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\3\\ApiGateway\\UserService\\UserService.csproj": {}
+    "D:\\3\\QLK\\ApiGateway\\UserService\\UserService.csproj": {}
   },
   "projects": {
-    "D:\\3\\ApiGateway\\UserService\\UserService.csproj": {
+    "D:\\3\\QLK\\ApiGateway\\UserService\\UserService.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\3\\ApiGateway\\UserService\\UserService.csproj",
+        "projectUniqueName": "D:\\3\\QLK\\ApiGateway\\UserService\\UserService.csproj",
         "projectName": "UserService",
-        "projectPath": "D:\\3\\ApiGateway\\UserService\\UserService.csproj",
+        "projectPath": "D:\\3\\QLK\\ApiGateway\\UserService\\UserService.csproj",
         "packagesPath": "C:\\Users\\manht\\.nuget\\packages\\",
-        "outputPath": "D:\\3\\ApiGateway\\UserService\\obj\\",
+        "outputPath": "D:\\3\\QLK\\ApiGateway\\UserService\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

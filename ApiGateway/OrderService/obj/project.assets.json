@@ -4305,11 +4305,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\3\\ApiGateway\\OrderService\\OrderService.csproj",
+      "projectUniqueName": "D:\\3\\QLK\\ApiGateway\\OrderService\\OrderService.csproj",
       "projectName": "OrderService",
-      "projectPath": "D:\\3\\ApiGateway\\OrderService\\OrderService.csproj",
+      "projectPath": "D:\\3\\QLK\\ApiGateway\\OrderService\\OrderService.csproj",
       "packagesPath": "C:\\Users\\manht\\.nuget\\packages\\",
-      "outputPath": "D:\\3\\ApiGateway\\OrderService\\obj\\",
+      "outputPath": "D:\\3\\QLK\\ApiGateway\\OrderService\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
