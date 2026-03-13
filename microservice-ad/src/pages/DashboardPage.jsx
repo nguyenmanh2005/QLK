@@ -9,25 +9,61 @@ export const DashboardPage = () => {
   const [stats, setStats]   = useState({ users: 0, products: 0, orders: 0, pending: 0 });
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError]   = useState(null);
 
   useEffect(() => {
     const load = async () => {
       try {
-        const [u, p, o] = await Promise.all([
+        const [uRes, pRes, oRes] = await Promise.allSettled([
           userService.getAll(),
           productService.getAll(),
           orderService.getAll(),
         ]);
-        const all = o.data;
-        setStats({ users: u.data.length, products: p.data.length, orders: all.length, pending: all.filter(x => x.status === 'Pending').length });
+
+        if (uRes.status === 'rejected') console.warn('Users API failed:', uRes.reason);
+        if (pRes.status === 'rejected') console.warn('Products API failed:', pRes.reason);
+        if (oRes.status === 'rejected') console.warn('Orders API failed:', oRes.reason);
+
+        const users    = uRes.status === 'fulfilled' ? (uRes.value?.data ?? uRes.value ?? []) : [];
+        const products = pRes.status === 'fulfilled' ? (pRes.value?.data ?? pRes.value ?? []) : [];
+        const all      = oRes.status === 'fulfilled' ? (oRes.value?.data ?? oRes.value ?? []) : [];
+
+        if (!Array.isArray(all)) {
+          console.error('Orders response is not an array:', all);
+          throw new Error('Unexpected API response shape');
+        }
+
+        setStats({
+          users:    Array.isArray(users)    ? users.length    : 0,
+          products: Array.isArray(products) ? products.length : 0,
+          orders:   all.length,
+          pending:  all.filter(x => x.status === 'Pending').length,
+        });
         setOrders([...all].reverse().slice(0, 5));
-      } catch (err) { console.error(err); }
-      finally { setLoading(false); }
+      } catch (err) {
+        console.error('Dashboard load error:', err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
     };
     load();
   }, []);
 
   if (loading) return <PageLoader />;
+
+  if (error) return (
+    <div className="flex flex-col items-center justify-center py-20 text-center space-y-2">
+      <p className="text-red-500 font-medium">Không thể tải dữ liệu</p>
+      <p className="text-sm text-gray-400">{error}</p>
+      <button
+        onClick={() => { setLoading(true); setError(null); }}
+        className="mt-4 px-4 py-2 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+      >
+        Thử lại
+      </button>
+    </div>
+  );
 
   return (
     <div className="space-y-6">

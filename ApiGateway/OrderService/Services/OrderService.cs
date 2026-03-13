@@ -1,9 +1,3 @@
-
-
-
-// ═══════════════════════════════════════════════════════════
-// OrderService.cs
-// ═══════════════════════════════════════════════════════════
 using OrderService.DTOs;
 using OrderService.HttpClients;
 using OrderService.Middlewares;
@@ -28,13 +22,32 @@ public class OrderService : IOrderService
         _productClient = productClient;
     }
 
+    // 2 HTTP calls thay vì N*2 calls
     public async Task<IEnumerable<OrderResponseDto>> GetAllAsync()
     {
-        var orders = await _repo.GetAllAsync();
-        var result = new List<OrderResponseDto>();
-        foreach (var order in orders)
-            result.Add(await EnrichOrderAsync(order));
-        return result;
+        var orders = (await _repo.GetAllAsync()).ToList();
+        if (!orders.Any()) return Enumerable.Empty<OrderResponseDto>();
+
+        var userIds = orders.Select(o => o.UserId).Distinct();
+        var productIds = orders.Select(o => o.ProductId).Distinct();
+
+        var usersTask = _userClient.GetUsersByIdsAsync(userIds);
+        var productsTask = _productClient.GetProductsByIdsAsync(productIds);
+        await Task.WhenAll(usersTask, productsTask);
+
+        var userMap = await usersTask;
+        var productMap = await productsTask;
+
+        return orders.Select(o => new OrderResponseDto
+        {
+            Id = o.Id,
+            Quantity = o.Quantity,
+            TotalPrice = o.TotalPrice,
+            Status = o.Status,
+            CreatedAt = o.CreatedAt,
+            User = userMap.GetValueOrDefault(o.UserId),
+            Product = productMap.GetValueOrDefault(o.ProductId),
+        });
     }
 
     public async Task<OrderResponseDto> GetByIdAsync(int id)
@@ -45,28 +58,48 @@ public class OrderService : IOrderService
         return await EnrichOrderAsync(order);
     }
 
+    // 2 HTTP calls thay vì N*2 calls
     public async Task<IEnumerable<OrderResponseDto>> GetByUserIdAsync(int userId)
     {
-        var orders = await _repo.GetByUserIdAsync(userId);
-        var result = new List<OrderResponseDto>();
-        foreach (var order in orders)
-            result.Add(await EnrichOrderAsync(order));
-        return result;
+        var orders = (await _repo.GetByUserIdAsync(userId)).ToList();
+        if (!orders.Any()) return Enumerable.Empty<OrderResponseDto>();
+
+        var productIds = orders.Select(o => o.ProductId).Distinct();
+
+        var userTask = _userClient.GetUserByIdAsync(userId);
+        var productMapTask = _productClient.GetProductsByIdsAsync(productIds);
+        await Task.WhenAll(userTask, productMapTask);
+
+        var user = await userTask;
+        var productMap = await productMapTask;
+
+        return orders.Select(o => new OrderResponseDto
+        {
+            Id = o.Id,
+            Quantity = o.Quantity,
+            TotalPrice = o.TotalPrice,
+            Status = o.Status,
+            CreatedAt = o.CreatedAt,
+            User = user,
+            Product = productMap.GetValueOrDefault(o.ProductId),
+        });
     }
 
     public async Task<OrderResponseDto> CreateAsync(CreateOrderDto dto)
     {
-        // Kiểm tra User tồn tại
-        var user = await _userClient.GetUserByIdAsync(dto.UserId);
+        var userTask = _userClient.GetUserByIdAsync(dto.UserId);
+        var productTask = _productClient.GetProductByIdAsync(dto.ProductId);
+        await Task.WhenAll(userTask, productTask);
+
+        var user = await userTask;
+        var product = await productTask;
+
         if (user is null)
             throw new NotFoundException($"User với Id = {dto.UserId} không tồn tại!");
 
-        // Kiểm tra Product tồn tại
-        var product = await _productClient.GetProductByIdAsync(dto.ProductId);
         if (product is null)
             throw new NotFoundException($"Product với Id = {dto.ProductId} không tồn tại!");
 
-        // Kiểm tra tồn kho
         if (product.Stock < dto.Quantity)
             throw new BadRequestException($"Sản phẩm không đủ hàng! Còn lại: {product.Stock}");
 
@@ -104,6 +137,7 @@ public class OrderService : IOrderService
         var updated = await _repo.UpdateStatusAsync(id, dto.Status);
         if (updated is null)
             throw new NotFoundException($"Không tìm thấy order với Id = {id}");
+
         return await EnrichOrderAsync(updated);
     }
 
@@ -114,12 +148,12 @@ public class OrderService : IOrderService
             throw new NotFoundException($"Không tìm thấy order với Id = {id}");
     }
 
-    // ─── Helper ────────────────────────────────────────────
-
+    // Helper: dùng cho GetById và UpdateStatus (single order)
     private async Task<OrderResponseDto> EnrichOrderAsync(Order order)
     {
-        var user = await _userClient.GetUserByIdAsync(order.UserId);
-        var product = await _productClient.GetProductByIdAsync(order.ProductId);
+        var userTask = _userClient.GetUserByIdAsync(order.UserId);
+        var productTask = _productClient.GetProductByIdAsync(order.ProductId);
+        await Task.WhenAll(userTask, productTask);
 
         return new OrderResponseDto
         {
@@ -128,8 +162,8 @@ public class OrderService : IOrderService
             TotalPrice = order.TotalPrice,
             Status = order.Status,
             CreatedAt = order.CreatedAt,
-            User = user,
-            Product = product
+            User = await userTask,
+            Product = await productTask,
         };
     }
 }

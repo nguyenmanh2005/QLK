@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\3\\QLK\\ApiGateway\\ApiGateway\\ApiGateway.csproj": {}
+    "D:\\3\\QLK\\ApiGateway\\apigateway\\ApiGateway.csproj": {}
   },
   "projects": {
-    "D:\\3\\QLK\\ApiGateway\\ApiGateway\\ApiGateway.csproj": {
+    "D:\\3\\QLK\\ApiGateway\\apigateway\\ApiGateway.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\3\\QLK\\ApiGateway\\ApiGateway\\ApiGateway.csproj",
+        "projectUniqueName": "D:\\3\\QLK\\ApiGateway\\apigateway\\ApiGateway.csproj",
         "projectName": "ApiGateway",
-        "projectPath": "D:\\3\\QLK\\ApiGateway\\ApiGateway\\ApiGateway.csproj",
+        "projectPath": "D:\\3\\QLK\\ApiGateway\\apigateway\\ApiGateway.csproj",
         "packagesPath": "C:\\Users\\manht\\.nuget\\packages\\",
-        "outputPath": "D:\\3\\QLK\\ApiGateway\\ApiGateway\\obj\\",
+        "outputPath": "D:\\3\\QLK\\ApiGateway\\apigateway\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

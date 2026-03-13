@@ -1,8 +1,8 @@
 import axios from 'axios';
 
-const USER_URL    = 'https://localhost:7296/api';
-const PRODUCT_URL = 'https://localhost:7084/api';
-const ORDER_URL   = 'https://localhost:7062/api';
+const USER_URL    = 'http://localhost:5268/api';
+const PRODUCT_URL = 'http://localhost:5159/api';
+const ORDER_URL   = 'http://localhost:5291/api';
 
 // ─── Axios instances ───────────────────────────────────────
 const createInstance = (baseURL) => {

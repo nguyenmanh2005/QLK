@@ -4,7 +4,7 @@ import { productService } from '../services/api';
 import { Modal, FormField, ConfirmDialog, DataTable, EmptyState, PageLoader } from '../components/UI';
 import toast from 'react-hot-toast';
 
-const PRODUCT_API = 'https://localhost:7084';
+const PRODUCT_API = 'http://localhost:5159';
 
 const ProductModal = ({ isOpen, onClose, onSaved, editProduct }) => {
   const isEdit = !!editProduct;

@@ -1,9 +1,3 @@
-
-
-
-// ═══════════════════════════════════════════════════════════
-// UserService.cs
-// ═══════════════════════════════════════════════════════════
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -39,6 +33,13 @@ public class UserService : IUserService
         if (user is null)
             throw new NotFoundException($"Không tìm thấy user với Id = {id}");
         return MapToResponse(user);
+    }
+
+    // ← MỚI: batch lookup cho OrderService
+    public async Task<IEnumerable<UserResponseDto>> GetByIdsAsync(IEnumerable<int> ids)
+    {
+        var users = await _repo.GetByIdsAsync(ids);
+        return users.Select(MapToResponse);
     }
 
     public async Task<UserResponseDto> CreateAsync(CreateUserDto dto)

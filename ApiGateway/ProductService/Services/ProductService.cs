@@ -25,6 +25,13 @@ public class ProductService : IProductService
         return MapToResponse(product);
     }
 
+    // ← MỚI: batch lookup cho OrderService
+    public async Task<IEnumerable<ProductResponseDto>> GetByIdsAsync(IEnumerable<int> ids)
+    {
+        var products = await _repo.GetByIdsAsync(ids);
+        return products.Select(MapToResponse);
+    }
+
     public async Task<ProductResponseDto> CreateAsync(CreateProductDto dto)
     {
         var product = new Product

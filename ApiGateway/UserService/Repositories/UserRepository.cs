@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using UserService.Data;
 using UserService.Models;
 
@@ -16,6 +16,12 @@ public class UserRepository : IUserRepository
     public async Task<User?> GetByIdAsync(int id)
         => await _context.Users.AsNoTracking()
                                .FirstOrDefaultAsync(u => u.Id == id);
+
+    // ← MỚI: lấy nhiều user 1 query
+    public async Task<IEnumerable<User>> GetByIdsAsync(IEnumerable<int> ids)
+        => await _context.Users.AsNoTracking()
+                               .Where(u => ids.Contains(u.Id))
+                               .ToListAsync();
 
     public async Task<User?> GetByEmailAsync(string email)
         => await _context.Users.AsNoTracking()

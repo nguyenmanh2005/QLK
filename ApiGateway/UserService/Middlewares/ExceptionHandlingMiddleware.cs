@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using System.Text.Json;
 
-namespace UserService.Middlewares; // đổi theo từng service
+namespace UserService.Middlewares;
 
 public class ExceptionHandlingMiddleware
 {
@@ -20,28 +20,31 @@ public class ExceptionHandlingMiddleware
     {
         try
         {
-            await _next(context); // chạy bình thường
+            await _next(context);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Lỗi xảy ra: {Message}", ex.Message);
+            if (context.Response.HasStarted)
+            {
+                _logger.LogWarning("Response đã bắt đầu, không thể ghi lỗi.");
+                return;
+            }
             await HandleExceptionAsync(context, ex);
         }
     }
 
     private static async Task HandleExceptionAsync(HttpContext context, Exception ex)
     {
-        // Xác định HTTP status code theo loại lỗi
         var statusCode = ex switch
         {
-            NotFoundException => HttpStatusCode.NotFound,           // 404
-            BadRequestException => HttpStatusCode.BadRequest,         // 400
-            UnauthorizedException => HttpStatusCode.Unauthorized,      // 401
-            ForbiddenException => HttpStatusCode.Forbidden,          // 403
-            _ => HttpStatusCode.InternalServerError  // 500
+            NotFoundException => HttpStatusCode.NotFound,
+            BadRequestException => HttpStatusCode.BadRequest,
+            UnauthorizedException => HttpStatusCode.Unauthorized,
+            ForbiddenException => HttpStatusCode.Forbidden,
+            _ => HttpStatusCode.InternalServerError
         };
 
-        // Tạo response JSON chuẩn
         var response = new
         {
             status = (int)statusCode,

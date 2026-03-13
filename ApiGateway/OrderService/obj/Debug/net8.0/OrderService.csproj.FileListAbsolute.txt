@@ -280,7 +280,6 @@ D:\3\QLK\ApiGateway\OrderService\obj\Debug\net8.0\staticwebassets.build.json.cac
 D:\3\QLK\ApiGateway\OrderService\obj\Debug\net8.0\staticwebassets.development.json
 D:\3\QLK\ApiGateway\OrderService\obj\Debug\net8.0\staticwebassets.build.endpoints.json
 D:\3\QLK\ApiGateway\OrderService\obj\Debug\net8.0\swae.build.ex.cache
-D:\3\QLK\ApiGateway\OrderService\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
 D:\3\QLK\ApiGateway\OrderService\obj\Debug\net8.0\OrderSer.4493321F.Up2Date
 D:\3\QLK\ApiGateway\OrderService\obj\Debug\net8.0\OrderService.dll
 D:\3\QLK\ApiGateway\OrderService\obj\Debug\net8.0\refint\OrderService.dll

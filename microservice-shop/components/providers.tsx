@@ -61,10 +61,12 @@ const CartContext = createContext<CartContextType | null>(null)
 
 // ==================== API CONFIG ====================
 const API_CONFIG = {
-  USER_URL: 'https://localhost:7296/api',
-  PRODUCT_URL: 'https://localhost:7084/api',
-  ORDER_URL: 'https://localhost:7062/api',
+  USER_URL: 'http://localhost:5268/api',
+  PRODUCT_URL: 'http://localhost:5159/api',
+  ORDER_URL: 'http://localhost:5291/api',
 }
+
+export const PRODUCT_BASE_URL = 'http://localhost:5159'
 
 async function apiRequest(baseUrl: string, endpoint: string, options?: RequestInit) {
   const token = typeof window !== 'undefined' ? localStorage.getItem('shop_token') : null

@@ -1,7 +1,7 @@
 "use client"
 
 import { ShoppingBag, Package, Plus } from 'lucide-react'
-import { useCart, type Product } from '@/components/providers'
+import { useCart, type Product, PRODUCT_BASE_URL } from '@/components/providers'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 
@@ -11,6 +11,10 @@ interface ProductCardProps {
 
 export function ProductCard({ product }: ProductCardProps) {
   const { addToCart } = useCart()
+
+  const imgSrc = product.imageUrl
+    ? (product.imageUrl.startsWith('/') ? `${PRODUCT_BASE_URL}${product.imageUrl}` : product.imageUrl)
+    : null
 
   const handleAddToCart = () => {
     if (product.stock < 1) {
@@ -27,9 +31,9 @@ export function ProductCard({ product }: ProductCardProps) {
     <article className="group relative flex flex-col overflow-hidden rounded-xl bg-card border border-border transition-all duration-300 hover:shadow-lg hover:shadow-muted/50 hover:-translate-y-0.5">
       {/* Image */}
       <div className="relative aspect-square overflow-hidden bg-muted">
-        {product.imageUrl ? (
+        {imgSrc ? (
           <img
-            src={product.imageUrl}
+            src={imgSrc}
             alt={product.name}
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
             onError={(e) => {
@@ -43,7 +47,7 @@ export function ProductCard({ product }: ProductCardProps) {
         <div 
           className={cn(
             "absolute inset-0 items-center justify-center bg-muted",
-            product.imageUrl ? "hidden" : "flex"
+            imgSrc ? "hidden" : "flex"
           )}
         >
           <Package className="h-12 w-12 text-muted-foreground/30" />

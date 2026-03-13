@@ -18,7 +18,7 @@ public class UsersController : ControllerBase
     public async Task<IActionResult> Login(LoginDto dto)
     {
         var result = await _service.LoginAsync(dto);
-        return Ok(result); // nếu sai → LoginAsync throw UnauthorizedException → Middleware bắt
+        return Ok(result);
     }
 
     // GET api/users
@@ -32,7 +32,24 @@ public class UsersController : ControllerBase
     public async Task<IActionResult> GetById(int id)
     {
         var user = await _service.GetByIdAsync(id);
-        return Ok(user); // nếu null → GetByIdAsync throw NotFoundException → Middleware bắt
+        return Ok(user);
+    }
+
+    // GET api/users/batch?ids=1,2,3  ← MỚI: dùng cho OrderService
+    [HttpGet("batch")]
+    public async Task<IActionResult> GetBatch([FromQuery] string ids)
+    {
+        if (string.IsNullOrWhiteSpace(ids))
+            return Ok(Enumerable.Empty<UserResponseDto>());
+
+        var idList = ids.Split(',')
+                        .Select(s => int.TryParse(s.Trim(), out var n) ? n : 0)
+                        .Where(n => n > 0)
+                        .Distinct()
+                        .ToList();
+
+        var users = await _service.GetByIdsAsync(idList);
+        return Ok(users);
     }
 
     // POST api/users

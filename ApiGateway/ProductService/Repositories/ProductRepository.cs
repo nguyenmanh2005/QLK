@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using ProductService.Data;
 using ProductService.Models;
 
@@ -8,6 +8,7 @@ public interface IProductRepository
 {
     Task<IEnumerable<Product>> GetAllAsync();
     Task<Product?> GetByIdAsync(int id);
+    Task<IEnumerable<Product>> GetByIdsAsync(IEnumerable<int> ids); // ← MỚI
     Task<Product> CreateAsync(Product product);
     Task<Product?> UpdateAsync(int id, Product product);
     Task<bool> DeleteAsync(int id);
@@ -26,6 +27,12 @@ public class ProductRepository : IProductRepository
         => await _context.Products.AsNoTracking()
                                   .FirstOrDefaultAsync(p => p.Id == id);
 
+    // ← MỚI: lấy nhiều product 1 query
+    public async Task<IEnumerable<Product>> GetByIdsAsync(IEnumerable<int> ids)
+        => await _context.Products.AsNoTracking()
+                                  .Where(p => ids.Contains(p.Id))
+                                  .ToListAsync();
+
     public async Task<Product> CreateAsync(Product product)
     {
         _context.Products.Add(product);
@@ -42,6 +49,8 @@ public class ProductRepository : IProductRepository
         existing.Description = product.Description;
         existing.Price = product.Price;
         existing.Stock = product.Stock;
+        existing.ImageUrl = product.ImageUrl;
+
         await _context.SaveChangesAsync();
         return existing;
     }

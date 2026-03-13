@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "SdaFK+F9lAY=",
+  "dgSpecHash": "CSk9tLCbD5k=",
   "success": true,
-  "projectFilePath": "D:\\3\\QLK\\ApiGateway\\ApiGateway\\ApiGateway.csproj",
+  "projectFilePath": "D:\\3\\QLK\\ApiGateway\\apigateway\\ApiGateway.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\manht\\.nuget\\packages\\fluentvalidation\\11.8.0\\fluentvalidation.11.8.0.nupkg.sha512",
     "C:\\Users\\manht\\.nuget\\packages\\ipaddressrange\\6.0.0\\ipaddressrange.6.0.0.nupkg.sha512",
@@ -16,8 +16,8 @@
     "C:\\Users\\manht\\.nuget\\packages\\newtonsoft.json.bson\\1.0.2\\newtonsoft.json.bson.1.0.2.nupkg.sha512",
     "C:\\Users\\manht\\.nuget\\packages\\ocelot\\23.3.3\\ocelot.23.3.3.nupkg.sha512",
     "C:\\Users\\manht\\.nuget\\packages\\system.diagnostics.diagnosticsource\\4.7.1\\system.diagnostics.diagnosticsource.4.7.1.nupkg.sha512",
-    "C:\\Users\\manht\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\8.0.24\\microsoft.windowsdesktop.app.ref.8.0.24.nupkg.sha512",
     "C:\\Users\\manht\\.nuget\\packages\\microsoft.netcore.app.ref\\8.0.24\\microsoft.netcore.app.ref.8.0.24.nupkg.sha512",
+    "C:\\Users\\manht\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\8.0.24\\microsoft.windowsdesktop.app.ref.8.0.24.nupkg.sha512",
     "C:\\Users\\manht\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\8.0.24\\microsoft.aspnetcore.app.ref.8.0.24.nupkg.sha512",
     "C:\\Users\\manht\\.nuget\\packages\\microsoft.netcore.app.host.win-x64\\8.0.24\\microsoft.netcore.app.host.win-x64.8.0.24.nupkg.sha512"
   ],

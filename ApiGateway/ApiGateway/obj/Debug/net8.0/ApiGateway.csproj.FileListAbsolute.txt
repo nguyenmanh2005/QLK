@@ -76,7 +76,6 @@ D:\3\QLK\ApiGateway\ApiGateway\obj\Debug\net8.0\staticwebassets.build.json.cache
 D:\3\QLK\ApiGateway\ApiGateway\obj\Debug\net8.0\staticwebassets.development.json
 D:\3\QLK\ApiGateway\ApiGateway\obj\Debug\net8.0\staticwebassets.build.endpoints.json
 D:\3\QLK\ApiGateway\ApiGateway\obj\Debug\net8.0\swae.build.ex.cache
-D:\3\QLK\ApiGateway\ApiGateway\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
 D:\3\QLK\ApiGateway\ApiGateway\obj\Debug\net8.0\ApiGateway.csproj.Up2Date
 D:\3\QLK\ApiGateway\ApiGateway\obj\Debug\net8.0\ApiGateway.dll
 D:\3\QLK\ApiGateway\ApiGateway\obj\Debug\net8.0\refint\ApiGateway.dll

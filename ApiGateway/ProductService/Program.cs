@@ -1,5 +1,6 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -45,15 +46,27 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
+// ─── Upload file size limit ────────────────────────────────
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 10 * 1024 * 1024; // 10MB
+});
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Limits.MaxRequestBodySize = 10 * 1024 * 1024; // 10MB
+});
+
 // ─── Dependency Injection ──────────────────────────────────
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IProductService, ProductService.Services.ProductService>();
 
-// ─── Swagger với JWT ───────────────────────────────────────
+// ─── Controllers + Validation ─────────────────────────────
 builder.Services.AddControllers();
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateProductValidator>();
 builder.Services.AddEndpointsApiExplorer();
+
+// ─── Swagger với JWT ───────────────────────────────────────
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "ProductService API", Version = "v1" });
@@ -86,11 +99,16 @@ using (var scope = app.Services.CreateScope())
     db.Database.Migrate();
 }
 
+// ─── Tạo thư mục uploads nếu chưa có ─────────────────────
+var uploadsDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+Directory.CreateDirectory(uploadsDir);
+
 // ─── Middleware ────────────────────────────────────────────
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseSwagger();
 app.UseSwaggerUI();
-app.UseCors("AllowFrontend");        // ← THÊM VÀO ĐÂY
+app.UseCors("AllowFrontend");
+app.UseStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

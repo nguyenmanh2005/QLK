@@ -280,10 +280,10 @@ D:\3\QLK\ApiGateway\ProductService\obj\Debug\net8.0\staticwebassets.build.json.c
 D:\3\QLK\ApiGateway\ProductService\obj\Debug\net8.0\staticwebassets.development.json
 D:\3\QLK\ApiGateway\ProductService\obj\Debug\net8.0\staticwebassets.build.endpoints.json
 D:\3\QLK\ApiGateway\ProductService\obj\Debug\net8.0\swae.build.ex.cache
-D:\3\QLK\ApiGateway\ProductService\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
 D:\3\QLK\ApiGateway\ProductService\obj\Debug\net8.0\ProductS.A0FC5512.Up2Date
 D:\3\QLK\ApiGateway\ProductService\obj\Debug\net8.0\ProductService.dll
 D:\3\QLK\ApiGateway\ProductService\obj\Debug\net8.0\refint\ProductService.dll
 D:\3\QLK\ApiGateway\ProductService\obj\Debug\net8.0\ProductService.pdb
 D:\3\QLK\ApiGateway\ProductService\obj\Debug\net8.0\ProductService.genruntimeconfig.cache
 D:\3\QLK\ApiGateway\ProductService\obj\Debug\net8.0\ref\ProductService.dll
+D:\3\QLK\ApiGateway\ProductService\bin\Debug\net8.0\ProductService.staticwebassets.runtime.json
