@@ -127,27 +127,30 @@ export const orderService = {
 }
 
 function AuthProvider({ children }: { children: ReactNode }) {
-  const [seller, setSeller]   = useState<Seller | null>(null)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
+  const [seller, setSeller] = useState<Seller | null>(() => {
+    if (typeof window === 'undefined') return null
     const saved = localStorage.getItem('seller_user')
-    if (saved) setSeller(JSON.parse(saved))
-    setLoading(false)
-  }, [])
+    return saved ? JSON.parse(saved) : null
+  })
+  const [loading, setLoading] = useState(false)
 
   const login = async (email: string, password: string) => {
-    const data = await authService.login({ email, password })
-    const { token } = data
-    const payload = JSON.parse(atob(token.split('.')[1]))
-    const sellerData: Seller = {
-      id:    payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'],
-      name:  payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'],
-      email: payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'],
+    setLoading(true)
+    try {
+      const data = await authService.login({ email, password })
+      const { token } = data
+      const payload = JSON.parse(atob(token.split('.')[1]))
+      const sellerData: Seller = {
+        id:    payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'],
+        name:  payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'],
+        email: payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'],
+      }
+      localStorage.setItem('seller_token', token)
+      localStorage.setItem('seller_user', JSON.stringify(sellerData))
+      setSeller(sellerData)
+    } finally {
+      setLoading(false)
     }
-    localStorage.setItem('seller_token', token)
-    localStorage.setItem('seller_user', JSON.stringify(sellerData))
-    setSeller(sellerData)
   }
 
   const logout = () => {
