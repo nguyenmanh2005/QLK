@@ -134,8 +134,9 @@ public class OrderService : IOrderService
 
     public async Task<OrderResponseDto> UpdateStatusAsync(int id, UpdateOrderStatusDto dto)
     {
+        // Thêm Returned vào validStatuses
         var validStatuses = new[]
-            { "Pending", "Packing", "Shipping", "Delivering", "Delivered", "Cancelled" };
+            { "Pending", "Packing", "Shipping", "Delivering", "Delivered", "Cancelled", "Returned" };
 
         if (!validStatuses.Contains(dto.Status))
             throw new BadRequestException(
@@ -158,9 +159,6 @@ public class OrderService : IOrderService
         return await EnrichOrderAsync(updated);
     }
 
-    /// <summary>
-    /// Hủy đơn hàng — chỉ cho phép khi status là Pending hoặc Packing.
-    /// </summary>
     public async Task<OrderResponseDto> CancelAsync(int id)
     {
         var order = await _repo.GetByIdAsync(id);
@@ -170,7 +168,7 @@ public class OrderService : IOrderService
         var cancellableStatuses = new[] { "Pending", "Packing" };
         if (!cancellableStatuses.Contains(order.Status))
             throw new BadRequestException(
-                $"Không thể hủy đơn #{id}. Chỉ hủy được khi đơn đang ở trạng thái Pending hoặc Packing (hiện tại: {order.Status}).");
+                $"Không thể hủy đơn #{id}. Chỉ hủy được khi đơn đang ở trạng thái Pending hoặc Packing.");
 
         var updated = await _repo.UpdateStatusAsync(id, "Cancelled");
         if (updated is null)

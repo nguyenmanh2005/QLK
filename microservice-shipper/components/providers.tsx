@@ -85,6 +85,8 @@ export const orderService = {
     apiRequest(`${API_BASE}/orders/${id}/assign`, { method: 'PATCH' }),
   confirmDelivered: (id: number) =>
     apiRequest(`${API_BASE}/orders/${id}/delivered`, { method: 'PUT' }),
+  returnOrder:      (id: number) =>
+    apiRequest(`${API_BASE}/orders/${id}/return`, { method: 'PUT' }),
 }
 
 function AuthProvider({ children }: { children: ReactNode }) {

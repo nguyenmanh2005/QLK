@@ -31,6 +31,7 @@ interface Order {
   productId: number
   quantity: number
   totalPrice: number
+  productName?: string
   status: string
   createdAt: string
   product?: Product

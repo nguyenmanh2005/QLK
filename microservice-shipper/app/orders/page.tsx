@@ -1,20 +1,21 @@
 "use client"
 
 import { useEffect, useState } from 'react'
-import { Truck, CheckCircle2, Clock, Loader2, Package, LogOut, PackageCheck } from 'lucide-react'
+import { Truck, CheckCircle2, Clock, Loader2, Package, LogOut, PackageCheck, RotateCcw } from 'lucide-react'
 import { useRequireAuth, useAuth, orderService, Providers, type Order } from '@/components/providers'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 
 function OrdersContent() {
-  const { isAuth, loading }             = useRequireAuth()
-  const { shipper, logout }             = useAuth()
-  const [tab, setTab]                   = useState<'available' | 'delivering' | 'delivered'>('available')
-  const [available, setAvailable]       = useState<Order[]>([])
-  const [delivering, setDelivering]     = useState<Order[]>([])
-  const [delivered, setDelivered]       = useState<Order[]>([])
-  const [loadingData, setLoadingData]   = useState(false)
-  const [actionId, setActionId]         = useState<number | null>(null)
+  const { isAuth, loading }           = useRequireAuth()
+  const { shipper, logout }           = useAuth()
+  const [tab, setTab]                 = useState<'available' | 'delivering' | 'delivered'>('available')
+  const [available, setAvailable]     = useState<Order[]>([])
+  const [delivering, setDelivering]   = useState<Order[]>([])
+  const [delivered, setDelivered]     = useState<Order[]>([])
+  const [loadingData, setLoadingData] = useState(false)
+  const [actionId, setActionId]       = useState<number | null>(null)
+  const [returningId, setReturningId] = useState<number | null>(null)
 
   const loadData = async () => {
     setLoadingData(true)
@@ -66,6 +67,21 @@ function OrdersContent() {
     }
   }
 
+  const handleReturn = async (id: number) => {
+    if (!confirm('Xác nhận hoàn hàng? Đơn sẽ được trả lại cho seller.')) return
+    setReturningId(id)
+    try {
+      await orderService.returnOrder(id)
+      toast.success('Hoàn hàng thành công!')
+      loadData()
+      setTab('available')
+    } catch (err: unknown) {
+      toast.error((err as Error).message || 'Hoàn hàng thất bại!')
+    } finally {
+      setReturningId(null)
+    }
+  }
+
   if (loading || loadingData) return (
     <div className="min-h-screen bg-slate-950 flex items-center justify-center">
       <div className="animate-spin h-8 w-8 border-2 border-emerald-500 border-t-transparent rounded-full" />
@@ -73,9 +89,9 @@ function OrdersContent() {
   )
 
   const tabs = [
-    { key: 'available',  label: 'Chờ nhận',   icon: Package,      count: available.length,  color: 'bg-yellow-600' },
-    { key: 'delivering', label: 'Đang giao',   icon: Truck,        count: delivering.length, color: 'bg-indigo-600' },
-    { key: 'delivered',  label: 'Đã giao',     icon: PackageCheck, count: delivered.length,  color: 'bg-emerald-600' },
+    { key: 'available',  label: 'Chờ nhận',  icon: Package,      count: available.length,  color: 'bg-yellow-600' },
+    { key: 'delivering', label: 'Đang giao',  icon: Truck,        count: delivering.length, color: 'bg-indigo-600' },
+    { key: 'delivered',  label: 'Đã giao',    icon: PackageCheck, count: delivered.length,  color: 'bg-emerald-600' },
   ] as const
 
   const current = tab === 'available' ? available
@@ -84,7 +100,6 @@ function OrdersContent() {
 
   return (
     <div className="min-h-screen bg-slate-950">
-      {/* Header */}
       <header className="bg-slate-900 border-b border-slate-800 px-6 py-4">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -105,7 +120,6 @@ function OrdersContent() {
       </header>
 
       <div className="max-w-2xl mx-auto p-6">
-        {/* Stats */}
         <div className="grid grid-cols-3 gap-3 mb-6">
           {tabs.map(t => {
             const Icon = t.icon
@@ -126,7 +140,6 @@ function OrdersContent() {
           })}
         </div>
 
-        {/* Tabs */}
         <div className="flex gap-2 mb-6">
           {tabs.map(t => {
             const Icon = t.icon
@@ -146,7 +159,6 @@ function OrdersContent() {
           })}
         </div>
 
-        {/* Orders list */}
         {current.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-center">
             <Package className="h-12 w-12 text-slate-600 mb-4" />
@@ -163,7 +175,12 @@ function OrdersContent() {
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <h3 className="font-semibold text-white">Đơn #{order.id}</h3>
+                      <div>
+                        <h3 className="font-semibold text-white">
+                          {order.productName || `#${order.productId}`}
+                        </h3>
+                        <p className="text-xs text-slate-500">Đơn #{order.id}</p>
+                      </div>
                       <span className={cn(
                         "text-xs px-2.5 py-1 rounded-full border",
                         tab === 'available'
@@ -176,10 +193,7 @@ function OrdersContent() {
                       </span>
                     </div>
                     <p className="text-sm text-slate-400">
-                      Sản phẩm: <span className="text-slate-300">
-                        {order.productName || `#${order.productId}`}
-                      </span>
-                      {' · '}SL: <span className="text-slate-300">{order.quantity}</span>
+                      SL: <span className="text-slate-300">{order.quantity}</span>
                     </p>
                     <p className="text-xs text-slate-500 mt-1 flex items-center gap-1">
                       <Clock className="h-3 w-3" />
@@ -205,15 +219,26 @@ function OrdersContent() {
                       </button>
                     )}
                     {tab === 'delivering' && (
-                      <button onClick={() => handleConfirm(order.id)}
-                        disabled={actionId === order.id}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium transition-all disabled:opacity-60">
-                        {actionId === order.id
-                          ? <Loader2 className="h-3 w-3 animate-spin" />
-                          : <CheckCircle2 className="h-3 w-3" />
-                        }
-                        Đã giao
-                      </button>
+                      <div className="flex flex-col gap-2">
+                        <button onClick={() => handleConfirm(order.id)}
+                          disabled={actionId === order.id || returningId === order.id}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium transition-all disabled:opacity-60">
+                          {actionId === order.id
+                            ? <Loader2 className="h-3 w-3 animate-spin" />
+                            : <CheckCircle2 className="h-3 w-3" />
+                          }
+                          Đã giao
+                        </button>
+                        <button onClick={() => handleReturn(order.id)}
+                          disabled={actionId === order.id || returningId === order.id}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white text-xs font-medium transition-all disabled:opacity-60">
+                          {returningId === order.id
+                            ? <Loader2 className="h-3 w-3 animate-spin" />
+                            : <RotateCcw className="h-3 w-3" />
+                          }
+                          Hoàn hàng
+                        </button>
+                      </div>
                     )}
                   </div>
                 </div>

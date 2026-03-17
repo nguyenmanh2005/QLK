@@ -347,7 +347,13 @@ function OrdersContent() {
                 {/* Order header */}
                 <div className="flex items-start justify-between">
                   <div>
-                    <h3 className="font-serif font-bold">Đơn #{order.id}</h3>
+<h3 className="font-serif font-bold">
+  {order.product?.name || order.productName || `Đơn #${order.id}`}
+</h3>
+<p className="mt-0.5 text-xs text-muted-foreground">#{order.id} · {new Date(order.createdAt).toLocaleDateString('vi-VN', {
+  day: '2-digit', month: '2-digit', year: 'numeric',
+  hour: '2-digit', minute: '2-digit'
+})}</p>
                     <p className="mt-0.5 text-xs text-muted-foreground">
                       {new Date(order.createdAt).toLocaleDateString('vi-VN', {
                         day: '2-digit', month: '2-digit', year: 'numeric',

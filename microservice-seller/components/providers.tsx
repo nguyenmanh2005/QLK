@@ -4,7 +4,6 @@ import { createContext, useContext, useState, useEffect, type ReactNode } from '
 import { useRouter } from 'next/navigation'
 import { Toaster } from 'sonner'
 
-// ==================== TYPES ====================
 interface Seller {
   id: string
   name: string
@@ -29,10 +28,11 @@ interface Order {
   quantity: number
   totalPrice: number
   status: string
+  shipperId?: number
+  shipperName?: string
   createdAt: string
 }
 
-// ==================== AUTH CONTEXT ====================
 interface AuthContextType {
   seller: Seller | null
   loading: boolean
@@ -43,7 +43,6 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null)
 
-// ==================== API CONFIG ====================
 export const SELLER_API   = 'http://localhost:5183'
 export const PRODUCT_BASE = 'http://localhost:5159'
 
@@ -74,16 +73,13 @@ async function apiRequest(url: string, options?: RequestInit) {
   }
 
   if (res.status === 204) return null
-
   const contentType = res.headers.get('content-type')
   const text = await res.text()
   if (!text) return null
   if (contentType?.includes('application/json')) return JSON.parse(text)
-
   try { return JSON.parse(text) } catch { return text }
 }
 
-// ==================== API SERVICES ====================
 export const authService = {
   login: (data: { email: string; password: string }) =>
     fetch(`${API.SELLER}/login`, {
@@ -100,26 +96,13 @@ export const authService = {
 }
 
 export const productService = {
-  getAll: () =>
-    apiRequest(`${API.SELLER}/products`),
-
+  getAll: () => apiRequest(`${API.SELLER}/products`),
   create: (data: Omit<Product, 'id'>) =>
-    apiRequest(`${API.SELLER}/products`, {
-      method: 'POST',
-      body: JSON.stringify(data),
-    }),
-
+    apiRequest(`${API.SELLER}/products`, { method: 'POST', body: JSON.stringify(data) }),
   update: (id: number, data: Omit<Product, 'id'>) =>
-    apiRequest(`${API.SELLER}/products/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    }),
-
+    apiRequest(`${API.SELLER}/products/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   delete: (id: number) =>
-    apiRequest(`${API.SELLER}/products/${id}`, {
-      method: 'DELETE',
-    }),
-
+    apiRequest(`${API.SELLER}/products/${id}`, { method: 'DELETE' }),
   uploadImage: async (file: File) => {
     const formData = new FormData()
     formData.append('file', file)
@@ -135,9 +118,7 @@ export const productService = {
 }
 
 export const orderService = {
-  getAll: () =>
-    apiRequest(`${API.SELLER}/orders`),
-
+  getAll: () => apiRequest(`${API.SELLER}/orders`),
   updateStatus: (id: number, status: string) =>
     apiRequest(`${API.SELLER}/orders/${id}/status`, {
       method: 'PUT',
@@ -145,7 +126,6 @@ export const orderService = {
     }),
 }
 
-// ==================== AUTH PROVIDER ====================
 function AuthProvider({ children }: { children: ReactNode }) {
   const [seller, setSeller]   = useState<Seller | null>(null)
   const [loading, setLoading] = useState(true)
@@ -183,7 +163,6 @@ function AuthProvider({ children }: { children: ReactNode }) {
   )
 }
 
-// ==================== HOOKS ====================
 export function useAuth() {
   const context = useContext(AuthContext)
   if (!context) throw new Error('useAuth must be used within AuthProvider')
@@ -199,7 +178,6 @@ export function useRequireAuth() {
   return { isAuth, loading }
 }
 
-// ==================== MAIN PROVIDER ====================
 export function Providers({ children }: { children: ReactNode }) {
   return (
     <AuthProvider>

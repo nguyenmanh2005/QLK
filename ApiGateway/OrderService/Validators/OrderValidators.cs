@@ -22,7 +22,7 @@ public class CreateOrderValidator : AbstractValidator<CreateOrderDto>
 public class UpdateOrderStatusValidator : AbstractValidator<UpdateOrderStatusDto>
 {
     private static readonly string[] ValidStatuses =
-        { "Pending", "Packing", "Shipping", "Delivering", "Delivered", "Cancelled" };
+        { "Pending", "Packing", "Shipping", "Delivering", "Delivered", "Cancelled", "Returned" };
 
     public UpdateOrderStatusValidator()
     {

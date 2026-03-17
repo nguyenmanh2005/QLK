@@ -26,6 +26,8 @@ builder.Services.AddHttpClient("OrderServiceClient", client =>
 {
     client.BaseAddress = new Uri(builder.Configuration["Services:OrderService"]!);
 });
+builder.Services.AddHttpClient("ShipperServiceClient", client =>
+    client.BaseAddress = new Uri(builder.Configuration["Services:ShipperService"]!));
 
 // JWT
 var jwtKey = builder.Configuration["Jwt:Key"]!;
