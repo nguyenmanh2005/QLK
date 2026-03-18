@@ -145,17 +145,16 @@ function ReviewSection({ productId }: { productId: number }) {
 }
 
 // ==================== SELLER SECTION ====================
-// FIX: gọi thẳng fetch với URL UserService, không dùng userService.getById
-// để tránh lỗi 404 throw redirect về /login
 function SellerSection({ sellerId }: { sellerId: number }) {
-  const [seller, setSeller]     = useState<SellerProfile | null>(null)
-  const [products, setProducts] = useState<Product[]>([])
-  const [loading, setLoading]   = useState(true)
+  const [seller, setSeller]             = useState<SellerProfile | null>(null)
+  const [products, setProducts]         = useState<Product[]>([])
+  const [sellerAvg, setSellerAvg]       = useState<number | null>(null)
+  const [totalReviews, setTotalReviews] = useState(0)
+  const [loading, setLoading]           = useState(true)
 
   useEffect(() => {
     const fetchSeller = async () => {
       try {
-        // Gọi trực tiếp, không throw nếu 404
         const [userRes, productsRes] = await Promise.all([
           fetch(`http://localhost:5183/api/seller/${sellerId}`),
           productService.getBySeller(sellerId).catch(() => []),
@@ -167,8 +166,21 @@ function SellerSection({ sellerId }: { sellerId: number }) {
         }
         // Nếu 404 thì seller = null, không crash
 
-        const list = Array.isArray(productsRes) ? productsRes : []
+        const list: Product[] = Array.isArray(productsRes) ? productsRes : []
         setProducts(list)
+
+        // Fetch reviews của tất cả sản phẩm song song rồi tính điểm trung bình tổng
+        if (list.length > 0) {
+          const allReviewArrays = await Promise.all(
+            list.map(p => reviewService.getByProduct(p.id).catch(() => [] as Review[]))
+          )
+          const allReviews = allReviewArrays.flat()
+          setTotalReviews(allReviews.length)
+          if (allReviews.length > 0) {
+            const avg = allReviews.reduce((s, r) => s + r.rating, 0) / allReviews.length
+            setSellerAvg(avg)
+          }
+        }
       } catch {
         // Không làm gì, chỉ không hiện seller section
       } finally {
@@ -207,6 +219,16 @@ function SellerSection({ sellerId }: { sellerId: number }) {
           <p className="mt-1 text-xs text-muted-foreground">
             {products.length} sản phẩm đang bán
           </p>
+          {/* Điểm đánh giá tổng của seller */}
+          {sellerAvg !== null ? (
+            <div className="mt-2 flex items-center gap-2">
+              <StarDisplay rating={Math.round(sellerAvg)} size="sm" />
+              <span className="text-xs font-semibold text-amber-500">{sellerAvg.toFixed(1)}</span>
+              <span className="text-xs text-muted-foreground">({totalReviews} đánh giá)</span>
+            </div>
+          ) : (
+            <p className="mt-1 text-xs text-muted-foreground">Chưa có đánh giá</p>
+          )}
         </div>
       </div>
 
