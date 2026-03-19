@@ -1,11 +1,13 @@
 {
   "Routes": [
-    // ─── UserService Routes ───────────────────────────────
     {
       "DownstreamPathTemplate": "/api/users/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
-        { "Host": "localhost", "Port": 5001 }
+        {
+          "Host": "localhost",
+          "Port": 5001
+        }
       ],
       "UpstreamPathTemplate": "/gateway/users/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
@@ -14,18 +16,22 @@
       "DownstreamPathTemplate": "/api/users",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
-        { "Host": "localhost", "Port": 5001 }
+        {
+          "Host": "localhost",
+          "Port": 5001
+        }
       ],
       "UpstreamPathTemplate": "/gateway/users",
       "UpstreamHttpMethod": [ "GET", "POST" ]
     },
-
-    // ─── OrderService Routes ──────────────────────────────
     {
       "DownstreamPathTemplate": "/api/orders/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
-        { "Host": "localhost", "Port": 5002 }
+        {
+          "Host": "localhost",
+          "Port": 5002
+        }
       ],
       "UpstreamPathTemplate": "/gateway/orders/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "PATCH", "DELETE" ]
@@ -34,18 +40,22 @@
       "DownstreamPathTemplate": "/api/orders",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
-        { "Host": "localhost", "Port": 5002 }
+        {
+          "Host": "localhost",
+          "Port": 5002
+        }
       ],
       "UpstreamPathTemplate": "/gateway/orders",
       "UpstreamHttpMethod": [ "GET", "POST" ]
     },
-
-    // ─── ProductService Routes ────────────────────────────
     {
       "DownstreamPathTemplate": "/api/products/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
-        { "Host": "localhost", "Port": 5003 }
+        {
+          "Host": "localhost",
+          "Port": 5003
+        }
       ],
       "UpstreamPathTemplate": "/gateway/products/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
@@ -54,13 +64,40 @@
       "DownstreamPathTemplate": "/api/products",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
-        { "Host": "localhost", "Port": 5003 }
+        {
+          "Host": "localhost",
+          "Port": 5003
+        }
       ],
       "UpstreamPathTemplate": "/gateway/products",
       "UpstreamHttpMethod": [ "GET", "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/cart/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5200
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/cart/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/cart",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5200
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/cart",
+      "UpstreamHttpMethod": [ "GET", "DELETE" ]
     }
   ],
   "GlobalConfiguration": {
-    "BaseUrl": "http://localhost:5000"
+    "BaseUrl": "http://localhost:5155"
   }
 }
