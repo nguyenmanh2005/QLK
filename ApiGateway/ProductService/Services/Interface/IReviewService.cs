@@ -1,6 +1,6 @@
 using ProductService.DTOs;
 
-namespace ProductService.Services;
+namespace ProductService.Services.Interface;
 
 public interface IReviewService
 {

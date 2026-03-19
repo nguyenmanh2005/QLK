@@ -1,4 +1,3 @@
-using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -6,6 +5,11 @@ using Microsoft.OpenApi.Models;
 using SellerService.Data;
 using SellerService.Repositories;
 using SellerService.Services;
+using SellerService.Repositories;
+using SellerService.Services;
+using SellerService.Services.Interface;
+using System.Text;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,7 +19,7 @@ builder.Services.AddDbContext<SellerDbContext>(opt =>
 
 // Repositories & Services
 builder.Services.AddScoped<ISellerRepository, SellerRepository>();
-builder.Services.AddScoped<ISellerService, SellerService.Services.SellerService>();
+builder.Services.AddScoped<ISellerService, SellerService.Services.SellerServiceImpl>();
 
 // HttpClient gọi sang ProductService và OrderService
 builder.Services.AddHttpClient("ProductServiceClient", client =>
@@ -49,6 +53,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 
+
+// ── Services ────────────────────────────────────────────
+builder.Services.AddScoped<ISellerRepository, SellerRepository>();
+builder.Services.AddScoped<ISellerService, SellerServiceImpl>();
+builder.Services.AddScoped<ISellerOrderService, SellerOrderService>();
+builder.Services.AddScoped<ISellerProductService, SellerProductService>();
 // Swagger với JWT
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>

@@ -11,6 +11,9 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using ProductService.Validators;
 using ProductService.Middlewares;
+using ProductService.Services.Interface;
+using ProductService.Services;
+using ProductService.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,7 +25,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
-        policy.WithOrigins("http://localhost:3000", "http://localhost:3001", "http://localhost:3002")
+        policy.WithOrigins("http://localhost:3000", "http://localhost:3001", "http://localhost:3002", "https://localhost:3003")
               .AllowAnyHeader()
               .AllowAnyMethod());
 });
@@ -67,6 +70,8 @@ builder.Services.AddControllers();
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateProductValidator>();
 builder.Services.AddEndpointsApiExplorer();
+
+builder.Services.AddScoped<IImageService, LocalImageService>();
 
 // ─── Swagger với JWT ───────────────────────────────────────
 builder.Services.AddSwaggerGen(c =>

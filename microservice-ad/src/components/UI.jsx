@@ -1,4 +1,51 @@
 import { AlertCircle, X, Loader2 } from 'lucide-react';
+import { useEffect } from 'react';
+
+export const useLoadingCursor = (isLoading) => {
+  useEffect(() => {
+    let cursor = document.getElementById('__custom-cursor__');
+    if (!cursor) {
+      cursor = document.createElement('div');
+      cursor.id = '__custom-cursor__';
+      cursor.style.cssText = `
+        position:fixed; width:32px; height:32px; pointer-events:none;
+        z-index:99999; display:none; transform:translate(-50%,-50%);
+      `;
+      cursor.innerHTML = `<svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="16" cy="16" r="13" stroke="#3b82f6" stroke-width="2" stroke-dasharray="50 32" stroke-linecap="round" opacity="0.3"/>
+        <circle cx="16" cy="16" r="13" stroke="#3b82f6" stroke-width="2.5" stroke-dasharray="20 62" stroke-linecap="round">
+          <animateTransform attributeName="transform" type="rotate" from="0 16 16" to="360 16 16" dur="0.7s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="16" cy="16" r="8" stroke="#8b5cf6" stroke-width="2" stroke-dasharray="12 38" stroke-linecap="round">
+          <animateTransform attributeName="transform" type="rotate" from="360 16 16" to="0 16 16" dur="0.5s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="16" cy="16" r="2.5" fill="#3b82f6"/>
+      </svg>`;
+      document.body.appendChild(cursor);
+    }
+
+    const move = (e) => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top  = e.clientY + 'px';
+    };
+
+    if (isLoading) {
+      document.body.style.cursor = 'none';
+      cursor.style.display = 'block';
+      window.addEventListener('mousemove', move);
+    } else {
+      document.body.style.cursor = '';
+      cursor.style.display = 'none';
+      window.removeEventListener('mousemove', move);
+    }
+
+    return () => {
+      document.body.style.cursor = '';
+      cursor.style.display = 'none';
+      window.removeEventListener('mousemove', move);
+    };
+  }, [isLoading]);
+};
 
 export const Spinner = ({ className = '' }) => (
   <Loader2 className={`animate-spin w-5 h-5 text-blue-600 ${className}`} />

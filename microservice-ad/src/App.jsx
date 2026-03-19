@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { LoadingProvider } from './context/LoadingContext';
 import { Layout } from './components/Layout';
 import { LoginPage, RegisterPage } from './pages/AuthPages';
 import { DashboardPage } from './pages/DashboardPage';
@@ -10,6 +11,8 @@ import { ShippersPage } from './pages/ShippersPage';
 import { ProductsPage } from './pages/ProductsPage';
 import { OrdersPage } from './pages/OrdersPage';
 import { Spinner } from './components/UI';
+// Thêm import này
+import { NotFoundPage } from './pages/NotFoundPage';
 
 const ProtectedRoute = ({ children }) => {
   const { isAuth, loading } = useAuth();
@@ -38,7 +41,7 @@ const AppRoutes = () => (
     <Route path="/products"  element={<ProtectedRoute><Layout><ProductsPage /></Layout></ProtectedRoute>} />
     <Route path="/orders"    element={<ProtectedRoute><Layout><OrdersPage /></Layout></ProtectedRoute>} />
     <Route path="/"  element={<Navigate to="/dashboard" replace />} />
-    <Route path="*"  element={<Navigate to="/dashboard" replace />} />
+    <Route path="*"  element={<NotFoundPage />} />
   </Routes>
 );
 
@@ -46,17 +49,19 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <AppRoutes />
-        <Toaster position="top-right"
-          toastOptions={{
-            style: {
-              background: '#1e293b', color: '#f1f5f9',
-              border: '1px solid #334155', borderRadius: '12px', fontSize: '14px',
-            },
-            success: { iconTheme: { primary: '#4ade80', secondary: '#1e293b' } },
-            error:   { iconTheme: { primary: '#f87171', secondary: '#1e293b' } },
-          }}
-        />
+        <LoadingProvider>
+          <AppRoutes />
+          <Toaster position="top-right"
+            toastOptions={{
+              style: {
+                background: '#1e293b', color: '#f1f5f9',
+                border: '1px solid #334155', borderRadius: '12px', fontSize: '14px',
+              },
+              success: { iconTheme: { primary: '#4ade80', secondary: '#1e293b' } },
+              error:   { iconTheme: { primary: '#f87171', secondary: '#1e293b' } },
+            }}
+          />
+        </LoadingProvider>
       </AuthProvider>
     </BrowserRouter>
   );

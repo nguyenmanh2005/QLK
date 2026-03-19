@@ -2,13 +2,14 @@ import { useEffect, useState } from 'react';
 import { Plus, Trash2, Search, RefreshCw } from 'lucide-react';
 import { orderService, userService, productService } from '../services/api';
 import { Modal, FormField, ConfirmDialog, DataTable, EmptyState, PageLoader, StatusBadge } from '../components/UI';
+import { useGlobalLoading } from '../context/LoadingContext';
 import toast from 'react-hot-toast';
 
 const CreateOrderModal = ({ isOpen, onClose, onSaved }) => {
-  const [form, setForm]     = useState({ userId: '', productId: '', quantity: 1 });
-  const [users, setUsers]   = useState([]);
+  const [form, setForm]         = useState({ userId: '', productId: '', quantity: 1 });
+  const [users, setUsers]       = useState([]);
   const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading]   = useState(false);
   const [loadingData, setLoadingData] = useState(true);
 
   useEffect(() => {
@@ -31,7 +32,11 @@ const CreateOrderModal = ({ isOpen, onClose, onSaved }) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await orderService.create({ userId: parseInt(form.userId), productId: parseInt(form.productId), quantity: parseInt(form.quantity) });
+      await orderService.create({
+        userId:    parseInt(form.userId),
+        productId: parseInt(form.productId),
+        quantity:  parseInt(form.quantity),
+      });
       toast.success('Tạo order thành công!');
       onSaved(); onClose();
     } catch (err) {
@@ -42,7 +47,9 @@ const CreateOrderModal = ({ isOpen, onClose, onSaved }) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Tạo Order mới">
       {loadingData ? (
-        <div className="flex justify-center py-8"><div className="animate-spin w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full" /></div>
+        <div className="flex justify-center py-8">
+          <div className="animate-spin w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full" />
+        </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-4">
           <FormField label="Khách hàng" required>
@@ -57,7 +64,9 @@ const CreateOrderModal = ({ isOpen, onClose, onSaved }) => {
               onChange={e => setForm(f => ({ ...f, productId: e.target.value }))} required>
               <option value="">-- Chọn sản phẩm --</option>
               {products.map(p => (
-                <option key={p.id} value={p.id}>{p.name} — {parseFloat(p.price).toLocaleString('vi-VN')}đ (còn {p.stock})</option>
+                <option key={p.id} value={p.id}>
+                  {p.name} — {parseFloat(p.price).toLocaleString('vi-VN')}đ (còn {p.stock})
+                </option>
               ))}
             </select>
           </FormField>
@@ -86,7 +95,7 @@ const CreateOrderModal = ({ isOpen, onClose, onSaved }) => {
 };
 
 const StatusModal = ({ isOpen, onClose, onSaved, order }) => {
-  const [status, setStatus] = useState('');
+  const [status, setStatus]   = useState('');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => { if (order) setStatus(order.status); }, [order]);
@@ -107,7 +116,9 @@ const StatusModal = ({ isOpen, onClose, onSaved, order }) => {
     <Modal isOpen={isOpen} onClose={onClose} title={`Cập nhật Order #${order?.id}`} size="sm">
       <form onSubmit={handleSubmit} className="space-y-3">
         {['Pending', 'Confirmed', 'Cancelled'].map(s => (
-          <label key={s} className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer ${status === s ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:bg-gray-50'}`}>
+          <label key={s} className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer ${
+            status === s ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:bg-gray-50'
+          }`}>
             <input type="radio" name="status" value={s} checked={status === s} onChange={() => setStatus(s)} />
             <StatusBadge status={s} />
           </label>
@@ -124,9 +135,10 @@ const StatusModal = ({ isOpen, onClose, onSaved, order }) => {
 };
 
 export const OrdersPage = () => {
-  const [orders, setOrders]   = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch]   = useState('');
+  const { setLoading: setGlobalLoading } = useGlobalLoading();
+  const [orders, setOrders]     = useState([]);
+  const [loading, setLoading]   = useState(true);
+  const [search, setSearch]     = useState('');
   const [filterStatus, setFilter] = useState('');
   const [createModal, setCreateModal] = useState(false);
   const [statusModal, setStatusModal] = useState(false);
@@ -136,21 +148,25 @@ export const OrdersPage = () => {
 
   const load = async () => {
     setLoading(true);
-    try { const res = await orderService.getAll(); setOrders(res.data); }
-    catch { toast.error('Không tải được danh sách!'); }
-    finally { setLoading(false); }
+    setGlobalLoading(true);
+    try {
+      const res = await orderService.getAll();
+      setOrders(res.data);
+    } catch { toast.error('Không tải được danh sách!'); }
+    finally { setLoading(false); setGlobalLoading(false); }
   };
 
   useEffect(() => { load(); }, []);
 
   const handleDelete = async () => {
     setDeleting(true);
+    setGlobalLoading(true);
     try {
       await orderService.delete(deleteId);
       toast.success('Xóa thành công!');
       setDeleteId(null); load();
     } catch (err) { toast.error(err.response?.data?.message || 'Xóa thất bại!'); }
-    finally { setDeleting(false); }
+    finally { setDeleting(false); setGlobalLoading(false); }
   };
 
   const filtered = orders.filter(o => {

@@ -2,6 +2,7 @@ using ProductService.DTOs;
 using ProductService.Middlewares;
 using ProductService.Models;
 using ProductService.Repositories;
+using ProductService.Services.Interface;
 
 namespace ProductService.Services;
 

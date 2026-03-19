@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Plus, Pencil, Trash2, Search } from 'lucide-react';
 import { productService } from '../services/api';
 import { Modal, FormField, ConfirmDialog, DataTable, EmptyState, PageLoader } from '../components/UI';
+import { useGlobalLoading } from '../context/LoadingContext';
 import toast from 'react-hot-toast';
 
 const PRODUCT_API = 'http://localhost:5159';
@@ -14,7 +15,6 @@ const ProductModal = ({ isOpen, onClose, onSaved, editProduct, sellers }) => {
   const [imageMode, setImageMode] = useState('url');
   const [uploading, setUploading] = useState(false);
 
-  // FIX: sellerId phải là string để <select> hiện đúng option
   useEffect(() => {
     if (!isOpen) return;
     setImageMode('url');
@@ -53,7 +53,6 @@ const ProductModal = ({ isOpen, onClose, onSaved, editProduct, sellers }) => {
     } finally { setUploading(false); }
   };
 
-  // FIX: parse sellerId an toàn, tránh NaN
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -88,7 +87,6 @@ const ProductModal = ({ isOpen, onClose, onSaved, editProduct, sellers }) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={isEdit ? 'Sửa sản phẩm' : 'Thêm sản phẩm'}>
       <form onSubmit={handleSubmit} className="space-y-4">
-
         <FormField label="Tên sản phẩm" required>
           <input className="input-field" placeholder="iPhone 15 Pro" value={form.name}
             onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required />
@@ -99,15 +97,12 @@ const ProductModal = ({ isOpen, onClose, onSaved, editProduct, sellers }) => {
             value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
         </FormField>
 
-        {/* Chọn Seller — dùng sellers được truyền từ props */}
         <FormField label="Người bán">
           <select className="input-field" value={form.sellerId}
             onChange={e => setForm(f => ({ ...f, sellerId: e.target.value }))}>
             <option value="">-- Chưa gán --</option>
             {sellers.map(s => (
-              <option key={s.id} value={String(s.id)}>
-                {s.name} ({s.email})
-              </option>
+              <option key={s.id} value={String(s.id)}>{s.name} ({s.email})</option>
             ))}
           </select>
         </FormField>
@@ -123,7 +118,6 @@ const ProductModal = ({ isOpen, onClose, onSaved, editProduct, sellers }) => {
               Tải lên máy
             </button>
           </div>
-
           {imageMode === 'url' ? (
             <input className="input-field" placeholder="https://example.com/image.jpg"
               value={form.imageUrl} onChange={e => setForm(f => ({ ...f, imageUrl: e.target.value }))} />
@@ -134,7 +128,6 @@ const ProductModal = ({ isOpen, onClose, onSaved, editProduct, sellers }) => {
               {uploading && <p className="text-xs text-blue-600 mt-1">⏳ Đang tải lên...</p>}
             </div>
           )}
-
           {previewSrc && (
             <div className="mt-2 relative">
               <img src={previewSrc} alt="preview"
@@ -171,6 +164,7 @@ const ProductModal = ({ isOpen, onClose, onSaved, editProduct, sellers }) => {
 };
 
 export const ProductsPage = () => {
+  const { setLoading: setGlobalLoading } = useGlobalLoading();
   const [products, setProducts]       = useState([]);
   const [sellers, setSellers]         = useState([]);
   const [loading, setLoading]         = useState(true);
@@ -180,7 +174,6 @@ export const ProductsPage = () => {
   const [deleteId, setDeleteId]       = useState(null);
   const [deleting, setDeleting]       = useState(false);
 
-  // Load sellers 1 lần khi mount — dùng chung cho bảng và modal
   useEffect(() => {
     fetch(`${SELLER_API}/api/seller/list`)
       .then(r => r.json())
@@ -189,24 +182,28 @@ export const ProductsPage = () => {
   }, []);
 
   const load = async () => {
-    try { const res = await productService.getAll(); setProducts(res.data); }
-    catch { toast.error('Không tải được danh sách!'); }
-    finally { setLoading(false); }
+    setLoading(true);
+    setGlobalLoading(true);
+    try {
+      const res = await productService.getAll();
+      setProducts(res.data);
+    } catch { toast.error('Không tải được danh sách!'); }
+    finally { setLoading(false); setGlobalLoading(false); }
   };
 
   useEffect(() => { load(); }, []);
 
   const handleDelete = async () => {
     setDeleting(true);
+    setGlobalLoading(true);
     try {
       await productService.delete(deleteId);
       toast.success('Xóa thành công!');
       setDeleteId(null); load();
     } catch (err) { toast.error(err.response?.data?.message || 'Xóa thất bại!'); }
-    finally { setDeleting(false); }
+    finally { setDeleting(false); setGlobalLoading(false); }
   };
 
-  // FIX: lấy tên seller từ sellers list thay vì hiện "Seller #id"
   const getSellerName = (sellerId) => {
     if (!sellerId) return '—';
     const seller = sellers.find(s => String(s.id) === String(sellerId));
@@ -232,7 +229,6 @@ export const ProductsPage = () => {
           <input className="input-field pl-9" placeholder="Tìm theo tên sản phẩm..."
             value={search} onChange={e => setSearch(e.target.value)} />
         </div>
-
         <DataTable
           headers={['#', 'Ảnh', 'Tên sản phẩm', 'Mô tả', 'Giá', 'Tồn kho', 'Người bán', 'Thao tác']}
           empty={filtered.length === 0 && <EmptyState icon={Search} title="Chưa có sản phẩm" desc="Thêm sản phẩm để bắt đầu" />}
@@ -263,10 +259,7 @@ export const ProductsPage = () => {
                     {p.stock}
                   </span>
                 </td>
-                {/* FIX: hiện tên seller thay vì "Seller #id" */}
-                <td className="py-3 px-4 text-gray-700 text-sm font-medium">
-                  {getSellerName(p.sellerId)}
-                </td>
+                <td className="py-3 px-4 text-gray-700 text-sm font-medium">{getSellerName(p.sellerId)}</td>
                 <td className="py-3 px-4">
                   <div className="flex gap-2">
                     <button onClick={() => { setEditProduct(p); setModal(true); }}
@@ -285,14 +278,8 @@ export const ProductsPage = () => {
         </DataTable>
       </div>
 
-      {/* Truyền sellers xuống modal để dùng chung, không cần fetch lại */}
-      <ProductModal
-        isOpen={modal}
-        onClose={() => setModal(false)}
-        onSaved={load}
-        editProduct={editProduct}
-        sellers={sellers}
-      />
+      <ProductModal isOpen={modal} onClose={() => setModal(false)} onSaved={load}
+        editProduct={editProduct} sellers={sellers} />
       <ConfirmDialog isOpen={!!deleteId} onClose={() => setDeleteId(null)} onConfirm={handleDelete}
         loading={deleting} title="Xóa sản phẩm" message="Bạn có chắc muốn xóa sản phẩm này không?" />
     </div>

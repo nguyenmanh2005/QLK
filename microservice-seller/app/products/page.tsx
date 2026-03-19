@@ -6,19 +6,22 @@ import { useRequireAuth, productService, Providers, PRODUCT_BASE, type Product }
 import { Sidebar } from '@/components/sidebar'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
-
-function ProductModal({ isOpen, onClose, onSaved, editProduct }: {
+// Đây là trang quản lý sản phẩm, nơi người bán có thể xem danh sách sản phẩm của mình, tạo mới, chỉnh sửa hoặc xóa sản phẩm.
+function ProductModal({ isOpen, onClose, onSaved, editProduct }: { // 
   isOpen: boolean
   onClose: () => void
   onSaved: () => void
-  editProduct: Product | null
-}) {
+  editProduct: Product | null 
+})
+ { // Đây là component modal dùng để tạo mới hoặc chỉnh sửa sản phẩm. 
+ // Nếu editProduct có giá trị thì sẽ điền form để chỉnh sửa, nếu không thì sẽ để trống để tạo mới. 
+ // Khi submit sẽ gọi API tương ứng và sau đó gọi onSaved để load lại danh sách sản phẩm, rồi đóng modal.
   const isEdit = !!editProduct
   const [form, setForm]           = useState({ name: '', description: '', price: '', stock: '', imageUrl: '' })
   const [loading, setLoading]     = useState(false)
   const [imageMode, setImageMode] = useState<'url' | 'upload'>('url')
   const [uploading, setUploading] = useState(false)
-
+// Khi mở modal, nếu có editProduct thì điền form, nếu không thì để trống
   useEffect(() => {
     if (!isOpen) return
     setImageMode('url')
@@ -30,7 +33,7 @@ function ProductModal({ isOpen, onClose, onSaved, editProduct }: {
       imageUrl:    editProduct.imageUrl || '',
     } : { name: '', description: '', price: '', stock: '', imageUrl: '' })
   }, [editProduct, isOpen])
-
+// Hàm xử lý khi chọn file ảnh để upload
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -45,7 +48,7 @@ function ProductModal({ isOpen, onClose, onSaved, editProduct }: {
       setUploading(false)
     }
   }
-
+// Hàm xử lý khi submit form, nếu isEdit thì gọi API update, nếu không thì gọi API create
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -67,13 +70,13 @@ function ProductModal({ isOpen, onClose, onSaved, editProduct }: {
       setLoading(false)
     }
   }
-
+// Đây là phần hiển thị ảnh xem trước nếu đã có URL ảnh, và có nút để xóa ảnh nếu muốn thay đổi
   const previewSrc = form.imageUrl
     ? (form.imageUrl.startsWith('/') ? `${PRODUCT_BASE}${form.imageUrl}` : form.imageUrl)
     : null
-
+// Nếu modal không mở thì không render gì cả
   if (!isOpen) return null
-
+// Đây là phần giao diện của modal, bao gồm form nhập thông tin sản phẩm và các nút để lưu hoặc hủy
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />

@@ -1,6 +1,8 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { Users, Package, ShoppingCart, LayoutDashboard, LogOut, Store, Truck } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useGlobalLoading } from '../context/LoadingContext';
+import { useLoadingCursor } from '../components/UI';
 import toast from 'react-hot-toast';
 
 const navItems = [
@@ -15,6 +17,8 @@ const navItems = [
 export const Layout = ({ children }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const { loading } = useGlobalLoading();
+  useLoadingCursor(loading);
 
   const handleLogout = () => {
     logout();

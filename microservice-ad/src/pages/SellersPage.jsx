@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Plus, Pencil, Trash2, Search, Store } from 'lucide-react';
 import { sellerService } from '../services/api';
 import { Modal, FormField, ConfirmDialog, DataTable, EmptyState, PageLoader } from '../components/UI';
+import { useGlobalLoading } from '../context/LoadingContext';
 import toast from 'react-hot-toast';
 
 const SellerModal = ({ isOpen, onClose, onSaved, editSeller }) => {
@@ -63,6 +64,7 @@ const SellerModal = ({ isOpen, onClose, onSaved, editSeller }) => {
 };
 
 export const SellersPage = () => {
+  const { setLoading: setGlobalLoading } = useGlobalLoading();
   const [sellers, setSellers]   = useState([]);
   const [loading, setLoading]   = useState(true);
   const [search, setSearch]     = useState('');
@@ -72,24 +74,27 @@ export const SellersPage = () => {
   const [deleting, setDeleting]     = useState(false);
 
   const load = async () => {
+    setLoading(true);
+    setGlobalLoading(true);
     try {
       const res = await sellerService.getAll();
       setSellers(res.data);
     } catch { toast.error('Không tải được danh sách!'); }
-    finally { setLoading(false); }
+    finally { setLoading(false); setGlobalLoading(false); }
   };
 
   useEffect(() => { load(); }, []);
 
   const handleDelete = async () => {
     setDeleting(true);
+    setGlobalLoading(true);
     try {
       await sellerService.delete(deleteId);
       toast.success('Xóa thành công!');
       setDeleteId(null); load();
     } catch (err) {
       toast.error(err.response?.data?.message || 'Xóa thất bại!');
-    } finally { setDeleting(false); }
+    } finally { setDeleting(false); setGlobalLoading(false); }
   };
 
   const filtered = sellers.filter(s =>
@@ -123,9 +128,7 @@ export const SellersPage = () => {
               <td className="py-3 px-4 text-gray-400">{i + 1}</td>
               <td className="py-3 px-4 font-medium text-gray-900">{seller.name}</td>
               <td className="py-3 px-4 text-gray-600">{seller.email}</td>
-              <td className="py-3 px-4 text-gray-500">
-                {new Date(seller.createdAt).toLocaleDateString('vi-VN')}
-              </td>
+              <td className="py-3 px-4 text-gray-500">{new Date(seller.createdAt).toLocaleDateString('vi-VN')}</td>
               <td className="py-3 px-4">
                 <div className="flex gap-2">
                   <button onClick={() => { setEditSeller(seller); setModal(true); }}

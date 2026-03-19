@@ -8,6 +8,9 @@ using ShipperService.Data;
 using ShipperService.Middlewares;
 using ShipperService.Repositories;
 using ShipperService.Services;
+using ShipperService.Repositories;
+using ShipperService.Services;
+using ShipperService.Services.Interface;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -46,8 +49,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 builder.Services.AddScoped<IShipperRepository, ShipperRepository>();
-builder.Services.AddScoped<IShipperService, ShipperService.Services.ShipperService>();
+
 builder.Services.AddControllers();
+builder.Services.AddScoped<IShipperRepository, ShipperRepository>();
+builder.Services.AddScoped<IShipperService, ShipperServiceImpl>();
+builder.Services.AddScoped<IShipperOrderService, ShipperOrderService>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {

@@ -3,9 +3,11 @@ import { Users, Package, ShoppingCart, Clock } from 'lucide-react';
 import { userService, productService, orderService } from '../services/api';
 import { StatCard, PageLoader, StatusBadge } from '../components/UI';
 import { useAuth } from '../context/AuthContext';
+import { useGlobalLoading } from '../context/LoadingContext';
 
 export const DashboardPage = () => {
   const { user } = useAuth();
+  const { setLoading: setGlobalLoading } = useGlobalLoading();
   const [stats, setStats]   = useState({ users: 0, products: 0, orders: 0, pending: 0 });
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -13,6 +15,8 @@ export const DashboardPage = () => {
 
   useEffect(() => {
     const load = async () => {
+      setLoading(true);
+      setGlobalLoading(true);
       try {
         const [uRes, pRes, oRes] = await Promise.allSettled([
           userService.getAll(),
@@ -45,6 +49,7 @@ export const DashboardPage = () => {
         setError(err.message);
       } finally {
         setLoading(false);
+        setGlobalLoading(false);
       }
     };
     load();

@@ -49,7 +49,7 @@ public class ProductRepository : IProductRepository
         existing.Price       = product.Price;
         existing.Stock       = product.Stock;
         existing.ImageUrl    = product.ImageUrl;
-        existing.SellerId    = product.SellerId; // ← FIX: thêm dòng này
+        existing.SellerId    = product.SellerId; 
 
         await _context.SaveChangesAsync();
         return existing;

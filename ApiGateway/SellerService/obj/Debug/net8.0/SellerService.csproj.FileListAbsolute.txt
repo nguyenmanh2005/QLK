@@ -140,3 +140,4 @@ D:\3\QLK\ApiGateway\SellerService\obj\Debug\net8.0\refint\SellerService.dll
 D:\3\QLK\ApiGateway\SellerService\obj\Debug\net8.0\SellerService.pdb
 D:\3\QLK\ApiGateway\SellerService\obj\Debug\net8.0\SellerService.genruntimeconfig.cache
 D:\3\QLK\ApiGateway\SellerService\obj\Debug\net8.0\ref\SellerService.dll
+D:\3\QLK\ApiGateway\SellerService\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt

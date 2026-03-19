@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using AdminService.DTOs;
-using AdminService.Services;
+using AdminService.Services.Interface;
 
 namespace AdminService.Controllers;
 
