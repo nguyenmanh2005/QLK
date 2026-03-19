@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Net.Http.Headers;
 using System.Security.Claims;
 using SellerService.DTOs;
+using SellerService.Services.Interface;
 
 namespace SellerService.Controllers;
 
@@ -11,79 +11,48 @@ namespace SellerService.Controllers;
 [Authorize(Roles = "Seller")]
 public class ProductsController : ControllerBase
 {
-    private readonly IHttpClientFactory _http;
-    public ProductsController(IHttpClientFactory http) => _http = http;
+    private readonly ISellerProductService _productService;
 
-    private int GetSellerId() =>
-        int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-
-    // Tạo client với token của seller truyền sang ProductService
-    private HttpClient GetProductClient()
+    public ProductsController(ISellerProductService productService)
     {
-        var client = _http.CreateClient("ProductServiceClient");
-        var token  = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-        client.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Bearer", token);
-        return client;
+        _productService = productService;
     }
+
+    private string Token =>
+        Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+
+    private int SellerId =>
+        int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        var sellerId = GetSellerId();
-        var client   = GetProductClient();
-        var res      = await client.GetAsync($"/api/products/seller/{sellerId}");
-        var data     = await res.Content.ReadAsStringAsync();
-        return Content(data, "application/json");
+        var (_, _, body) = await _productService.GetAllAsync(Token, SellerId);
+        return Content(body, "application/json");
     }
 
     [HttpPost]
     public async Task<IActionResult> Create(CreateProductDto dto)
     {
-        dto.SellerId = GetSellerId();
-        var client   = GetProductClient();
-        var res      = await client.PostAsJsonAsync("/api/products", dto);
-
-        if (!res.IsSuccessStatusCode)
-        {
-            var err = await res.Content.ReadAsStringAsync();
-            return StatusCode((int)res.StatusCode, err);
-        }
-
-        var data = await res.Content.ReadAsStringAsync();
-        return Content(data, "application/json");
+        dto.SellerId = SellerId;
+        var (ok, status, body) = await _productService.CreateAsync(Token, dto);
+        return ok ? Content(body, "application/json") : StatusCode(status, body);
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int id, UpdateProductDto dto)
     {
-        dto.SellerId = GetSellerId();
-        var client   = GetProductClient();
-        var res      = await client.PutAsJsonAsync($"/api/products/{id}", dto);
-
-        if (!res.IsSuccessStatusCode)
-        {
-            var err = await res.Content.ReadAsStringAsync();
-            return StatusCode((int)res.StatusCode, err);
-        }
-
-        var data = await res.Content.ReadAsStringAsync();
-        return Content(data, "application/json");
+        dto.SellerId = SellerId;
+        var (ok, status, body) = await _productService.UpdateAsync(Token, id, dto);
+        return ok ? Content(body, "application/json") : StatusCode(status, body);
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var sellerId  = GetSellerId();
-        var client    = GetProductClient();
-
-        var checkRes  = await client.GetAsync($"/api/products/{id}");
-        if (!checkRes.IsSuccessStatusCode) return NotFound();
-
-        var checkData = await checkRes.Content.ReadFromJsonAsync<ProductDto>();
-        if (checkData?.SellerId != sellerId) return Forbid();
-
-        var res = await client.DeleteAsync($"/api/products/{id}");
-        return res.IsSuccessStatusCode ? NoContent() : BadRequest();
+        var (ok, status, body) = await _productService.DeleteAsync(Token, id, SellerId);
+        if (!ok && status == 404) return NotFound();
+        if (!ok && status == 403) return Forbid();
+        return ok ? NoContent() : BadRequest(body);
     }
 }

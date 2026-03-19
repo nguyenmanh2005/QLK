@@ -140,3 +140,4 @@ D:\3\QLK\ApiGateway\ShipperService\obj\Debug\net8.0\refint\ShipperService.dll
 D:\3\QLK\ApiGateway\ShipperService\obj\Debug\net8.0\ShipperService.pdb
 D:\3\QLK\ApiGateway\ShipperService\obj\Debug\net8.0\ShipperService.genruntimeconfig.cache
 D:\3\QLK\ApiGateway\ShipperService\obj\Debug\net8.0\ref\ShipperService.dll
+D:\3\QLK\ApiGateway\ShipperService\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt

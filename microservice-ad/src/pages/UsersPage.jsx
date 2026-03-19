@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Plus, Pencil, Trash2, Search } from 'lucide-react';
 import { userService } from '../services/api';
 import { Modal, FormField, ConfirmDialog, DataTable, EmptyState, PageLoader } from '../components/UI';
+import { useGlobalLoading } from '../context/LoadingContext';
 import toast from 'react-hot-toast';
 
 const UserModal = ({ isOpen, onClose, onSaved, editUser }) => {
@@ -62,6 +63,7 @@ const UserModal = ({ isOpen, onClose, onSaved, editUser }) => {
 };
 
 export const UsersPage = () => {
+  const { setLoading: setGlobalLoading } = useGlobalLoading();
   const [users, setUsers]       = useState([]);
   const [loading, setLoading]   = useState(true);
   const [search, setSearch]     = useState('');
@@ -71,24 +73,27 @@ export const UsersPage = () => {
   const [deleting, setDeleting] = useState(false);
 
   const load = async () => {
+    setLoading(true);
+    setGlobalLoading(true);
     try {
       const res = await userService.getAll();
       setUsers(res.data);
     } catch { toast.error('Không tải được danh sách!'); }
-    finally { setLoading(false); }
+    finally { setLoading(false); setGlobalLoading(false); }
   };
 
   useEffect(() => { load(); }, []);
 
   const handleDelete = async () => {
     setDeleting(true);
+    setGlobalLoading(true);
     try {
       await userService.delete(deleteId);
       toast.success('Xóa thành công!');
       setDeleteId(null); load();
     } catch (err) {
       toast.error(err.response?.data?.message || 'Xóa thất bại!');
-    } finally { setDeleting(false); }
+    } finally { setDeleting(false); setGlobalLoading(false); }
   };
 
   const filtered = users.filter(u =>
@@ -122,9 +127,7 @@ export const UsersPage = () => {
               <td className="py-3 px-4 text-gray-400">{i + 1}</td>
               <td className="py-3 px-4 font-medium text-gray-900">{user.name}</td>
               <td className="py-3 px-4 text-gray-600">{user.email}</td>
-              <td className="py-3 px-4 text-gray-500">
-                {new Date(user.createdAt).toLocaleDateString('vi-VN')}
-              </td>
+              <td className="py-3 px-4 text-gray-500">{new Date(user.createdAt).toLocaleDateString('vi-VN')}</td>
               <td className="py-3 px-4">
                 <div className="flex gap-2">
                   <button onClick={() => { setEditUser(user); setModal(true); }}

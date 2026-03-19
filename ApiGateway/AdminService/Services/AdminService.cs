@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using AdminService.DTOs;
 using AdminService.Models;
 using AdminService.Repositories;
+using AdminService.Services.Interface;
 
 namespace AdminService.Services;
 

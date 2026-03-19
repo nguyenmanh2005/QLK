@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SellerService.DTOs;
-using SellerService.Repositories;
-using SellerService.Services;
+using SellerService.Services.Interface;
 
 namespace SellerService.Controllers;
 
@@ -9,13 +8,11 @@ namespace SellerService.Controllers;
 [Route("api/seller")]
 public class AuthController : ControllerBase
 {
-    private readonly ISellerService    _service;
-    private readonly ISellerRepository _repo;
+    private readonly ISellerService _service;
 
-    public AuthController(ISellerService service, ISellerRepository repo)
+    public AuthController(ISellerService service)
     {
         _service = service;
-        _repo    = repo;
     }
 
     [HttpPost("register")]
@@ -28,57 +25,26 @@ public class AuthController : ControllerBase
 
     [HttpGet("list")]
     public async Task<IActionResult> GetAll()
-    {
-        var sellers = await _repo.GetAllAsync();
-        return Ok(sellers.Select(s => new SellerResponseDto
-        {
-            Id        = s.Id,
-            Name      = s.Name,
-            Email     = s.Email,
-            CreatedAt = s.CreatedAt,
-        }));
-    }
+        => Ok(await _service.GetAllAsync());
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
     {
-        var seller = await _repo.GetByIdAsync(id);
-        if (seller is null) return NotFound();
-        return Ok(new SellerResponseDto
-        {
-            Id        = seller.Id,
-            Name      = seller.Name,
-            Email     = seller.Email,
-            CreatedAt = seller.CreatedAt,
-        });
+        var seller = await _service.GetByIdAsync(id);
+        return seller is null ? NotFound() : Ok(seller);
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int id, UpdateSellerDto dto)
     {
-        var seller = await _repo.GetByIdAsync(id);
-        if (seller is null) return NotFound();
-
-        seller.Name  = dto.Name;
-        seller.Email = dto.Email;
-        if (!string.IsNullOrEmpty(dto.Password))
-            seller.Password = BCrypt.Net.BCrypt.HashPassword(dto.Password);
-
-        await _repo.UpdateAsync(seller);
-        return Ok(new SellerResponseDto
-        {
-            Id        = seller.Id,
-            Name      = seller.Name,
-            Email     = seller.Email,
-            CreatedAt = seller.CreatedAt,
-        });
+        var updated = await _service.UpdateAsync(id, dto);
+        return updated is null ? NotFound() : Ok(updated);
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var result = await _repo.DeleteAsync(id);
-        if (!result) return NotFound();
-        return NoContent();
+        var deleted = await _service.DeleteAsync(id);
+        return deleted ? NoContent() : NotFound();
     }
 }

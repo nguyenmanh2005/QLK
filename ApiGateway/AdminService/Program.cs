@@ -6,7 +6,11 @@ using Microsoft.OpenApi.Models;
 using AdminService.Data;
 using AdminService.Middlewares;
 using AdminService.Repositories;
+using AdminService.Services.Interface;
 using AdminService.Services;
+using AdminService.Services.Interfaces;
+
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,8 +54,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization();
 builder.Services.AddScoped<IAdminRepository, AdminRepository>();
 builder.Services.AddScoped<IAdminService, AdminService.Services.AdminService>();
+builder.Services.AddScoped<IUserAdminService, UserAdminService>();
+builder.Services.AddScoped<ISellerAdminService, SellerAdminService>();
+builder.Services.AddScoped<IShipperAdminService, ShipperAdminService>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "AdminService API", Version = "v1" });

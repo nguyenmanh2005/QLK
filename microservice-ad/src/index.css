@@ -9,7 +9,10 @@
     color: #1e293b;
   }
 }
-
+.cursor-loading,
+.cursor-loading * {
+  cursor: wait !important;
+}
 @layer components {
   .btn-primary {
     @apply bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg flex items-center gap-2 text-sm disabled:opacity-50;

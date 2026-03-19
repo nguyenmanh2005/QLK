@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProductService.DTOs;
-using ProductService.Services;
+using ProductService.Services.Interface;
+using ProductService.Services.Interfaces;
 
 namespace ProductService.Controllers;
 
@@ -10,7 +11,13 @@ namespace ProductService.Controllers;
 public class ProductsController : ControllerBase
 {
     private readonly IProductService _service;
-    public ProductsController(IProductService service) => _service = service;
+    private readonly IImageService _imageService;
+
+    public ProductsController(IProductService service, IImageService imageService)
+    {
+        _service = service;
+        _imageService = imageService;
+    }
 
     // GET api/products
     [HttpGet]
@@ -20,19 +27,18 @@ public class ProductsController : ControllerBase
     // GET api/products/5
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
-    {
-        var product = await _service.GetByIdAsync(id);
-        return Ok(product);
-    }
+        => Ok(await _service.GetByIdAsync(id));
+
+    // GET api/products/seller/5
     [HttpGet("seller/{sellerId}")]
     public async Task<IActionResult> GetBySeller(int sellerId)
     {
         var products = await _service.GetAllAsync();
-        var filtered = products.Where(p => p.SellerId == sellerId); // null sẽ bị loại
+        var filtered = products.Where(p => p.SellerId == sellerId);
         return Ok(filtered);
     }
-    // GET api/products/batch?ids=1,2,3  ← MỚI: dùng cho OrderService
 
+    // GET api/products/batch?ids=1,2,3
     [HttpGet("batch")]
     public async Task<IActionResult> GetBatch([FromQuery] string ids)
     {
@@ -45,8 +51,7 @@ public class ProductsController : ControllerBase
                         .Distinct()
                         .ToList();
 
-        var products = await _service.GetByIdsAsync(idList);
-        return Ok(products);
+        return Ok(await _service.GetByIdsAsync(idList));
     }
 
     // POST api/products
@@ -62,10 +67,7 @@ public class ProductsController : ControllerBase
     [HttpPut("{id}")]
     [Authorize]
     public async Task<IActionResult> Update(int id, UpdateProductDto dto)
-    {
-        var updated = await _service.UpdateAsync(id, dto);
-        return Ok(updated);
-    }
+        => Ok(await _service.UpdateAsync(id, dto));
 
     // DELETE api/products/5
     [HttpDelete("{id}")]
@@ -84,26 +86,12 @@ public class ProductsController : ControllerBase
     {
         try
         {
-            if (file == null || file.Length == 0)
-                return BadRequest(new { message = "File không hợp lệ" });
-
-            var allowed = new[] { "image/jpeg", "image/png", "image/webp" };
-            if (!allowed.Contains(file.ContentType))
-                return BadRequest(new { message = "Chỉ chấp nhận JPG, PNG, WebP" });
-
-            var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
-            Directory.CreateDirectory(uploadsPath);
-
-            var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
-            var fileName = $"{Guid.NewGuid()}{ext}";
-            var filePath = Path.Combine(uploadsPath, fileName);
-
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                await file.CopyToAsync(stream);
-            }
-
-            return Ok(new { imageUrl = $"/uploads/{fileName}" });
+            var imageUrl = await _imageService.UploadAsync(file);
+            return Ok(new { imageUrl });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
         }
         catch (Exception ex)
         {

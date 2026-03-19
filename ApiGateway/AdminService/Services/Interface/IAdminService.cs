@@ -1,6 +1,6 @@
 using AdminService.DTOs;
 
-namespace AdminService.Services;
+namespace AdminService.Services.Interface;
 
 public interface IAdminService
 {

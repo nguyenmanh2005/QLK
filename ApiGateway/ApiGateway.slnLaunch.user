@@ -17,6 +17,18 @@
       {
         "Path": "UserService\\UserService.csproj",
         "Action": "Start"
+      },
+      {
+        "Path": "AdminService\\AdminService.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "SellerService\\SellerService.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "ShipperService\\ShipperService.csproj",
+        "Action": "Start"
       }
     ]
   }

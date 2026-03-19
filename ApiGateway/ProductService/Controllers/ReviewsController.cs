@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProductService.DTOs;
-using ProductService.Services;
+using ProductService.Services.Interface;
 
 namespace ProductService.Controllers;
 
