@@ -286,4 +286,3 @@ D:\3\QLK\ApiGateway\UserService\obj\Debug\net8.0\refint\UserService.dll
 D:\3\QLK\ApiGateway\UserService\obj\Debug\net8.0\UserService.pdb
 D:\3\QLK\ApiGateway\UserService\obj\Debug\net8.0\UserService.genruntimeconfig.cache
 D:\3\QLK\ApiGateway\UserService\obj\Debug\net8.0\ref\UserService.dll
-D:\3\QLK\ApiGateway\UserService\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
