@@ -35,7 +35,9 @@ namespace CartService.Controllers
 
             var productIds = cart.Items.Select(i => i.ProductId).ToList();
             var products = await _productClient.GetProductsByIdsAsync(productIds);
-            var productMap = products.ToDictionary(p => p.Id);
+
+            // Key là string(id) để match với productId trong cart
+            var productMap = products.ToDictionary(p => p.Id.ToString());
 
             var enrichedItems = cart.Items
                 .Where(i => productMap.ContainsKey(i.ProductId))
@@ -44,21 +46,21 @@ namespace CartService.Controllers
                     var p = productMap[i.ProductId];
                     return new CartItemResponse
                     {
-                        ProductId = i.ProductId,
-                        SellerId = i.SellerId,
+                        ProductId  = i.ProductId,
+                        SellerId   = i.SellerId,
                         SellerName = p.SellerName,
-                        Name = p.Name,
-                        Price = p.Price,
-                        ImageUrl = p.ImageUrl,
-                        Stock = p.Stock,
-                        Quantity = Math.Min(i.Quantity, p.Stock)
+                        Name       = p.Name,
+                        Price      = p.Price,
+                        ImageUrl   = p.ImageUrl,
+                        Stock      = p.Stock,
+                        Quantity   = Math.Min(i.Quantity, p.Stock)
                     };
                 }).ToList();
 
             return Ok(new CartResponse
             {
                 UserId = UserId,
-                Items = enrichedItems
+                Items  = enrichedItems
             });
         }
 
@@ -81,8 +83,8 @@ namespace CartService.Controllers
             var item = new CartItem
             {
                 ProductId = request.ProductId,
-                SellerId = request.SellerId,
-                Quantity = request.Quantity
+                SellerId  = request.SellerId,
+                Quantity  = request.Quantity
             };
 
             await _cartService.AddItemAsync(UserId, item);

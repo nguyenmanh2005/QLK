@@ -32,8 +32,8 @@ public class SellerServiceImpl : ISellerService
 
         var seller = new Seller
         {
-            Name = dto.Name,
-            Email = dto.Email,
+            Name     = dto.Name,
+            Email    = dto.Email,
             Password = BCrypt.Net.BCrypt.HashPassword(dto.Password),
         };
 
@@ -71,7 +71,7 @@ public class SellerServiceImpl : ISellerService
         var seller = await _repo.GetByIdAsync(id);
         if (seller is null) return null;
 
-        seller.Name = dto.Name;
+        seller.Name  = dto.Name;
         seller.Email = dto.Email;
 
         if (!string.IsNullOrEmpty(dto.Password))
@@ -90,7 +90,7 @@ public class SellerServiceImpl : ISellerService
 
     private string GenerateToken(Seller seller)
     {
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));
+        var key   = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var claims = new[]
@@ -102,21 +102,26 @@ public class SellerServiceImpl : ISellerService
         };
 
         var token = new JwtSecurityToken(
-            issuer: _config["Jwt:Issuer"],
-            audience: _config["Jwt:Audience"],
-            claims: claims,
-            expires: DateTime.UtcNow.AddDays(7),
+            issuer:            _config["Jwt:Issuer"],
+            audience:          _config["Jwt:Audience"],
+            claims:            claims,
+            expires:           DateTime.UtcNow.AddDays(7),
             signingCredentials: creds
         );
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
+    // ─── Map Seller → DTO kèm QR fields ──────────────────
     private static SellerResponseDto ToDto(Seller s) => new()
     {
-        Id = s.Id,
-        Name = s.Name,
-        Email = s.Email,
-        CreatedAt = s.CreatedAt,
+        Id          = s.Id,
+        Name        = s.Name,
+        Email       = s.Email,
+        CreatedAt   = s.CreatedAt,
+        BankCode    = s.BankCode,
+        AccountNo   = s.AccountNo,
+        AccountName = s.AccountName,
+        QrStatus    = s.QrStatus.ToString(),
     };
 }

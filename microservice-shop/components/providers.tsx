@@ -11,6 +11,14 @@ interface User {
   email: string
 }
 
+export interface Category {
+  id: number
+  name: string
+  description?: string
+  imageUrl?: string
+  sortOrder: number
+}
+
 export interface Product {
   id: number
   name: string
@@ -19,6 +27,8 @@ export interface Product {
   stock: number
   imageUrl?: string
   sellerId?: number
+  categoryId?: number
+  categoryName?: string
 }
 
 export interface CartItem {
@@ -70,10 +80,11 @@ const API_CONFIG = {
   USER_URL:    'http://localhost:5268/api',
   PRODUCT_URL: 'http://localhost:5159/api',
   ORDER_URL:   'http://localhost:5291/api',
-  CART_URL:    'http://localhost:5000/gateway/cart', // qua API Gateway
+  CART_URL:    'http://localhost:5155/gateway/cart',
 }
 
 export const PRODUCT_BASE_URL = 'http://localhost:5159'
+export const PRODUCT_BASE     = PRODUCT_BASE_URL  // alias giữ tương thích
 
 function getToken() {
   if (typeof window === 'undefined') return null
@@ -89,7 +100,6 @@ async function apiRequest(url: string, options?: RequestInit, redirectOn401 = tr
   }
   const response = await fetch(url, { ...options, headers })
   if (!response.ok) {
-    // Chỉ redirect khi gọi UserService — không redirect khi CartService trả 401
     if (response.status === 401 && redirectOn401 && typeof window !== 'undefined') {
       localStorage.removeItem('shop_token')
       localStorage.removeItem('shop_user')
@@ -114,9 +124,39 @@ export const userService = {
 }
 
 export const productService = {
-  getAll:      ()              => apiRequest(`${API_CONFIG.PRODUCT_URL}/products`),
-  getById:     (id: number)    => apiRequest(`${API_CONFIG.PRODUCT_URL}/products/${id}`),
+  getAll:      ()                 => apiRequest(`${API_CONFIG.PRODUCT_URL}/products`),
+  getById:     (id: number)       => apiRequest(`${API_CONFIG.PRODUCT_URL}/products/${id}`),
   getBySeller: (sellerId: number) => apiRequest(`${API_CONFIG.PRODUCT_URL}/products/seller/${sellerId}`),
+
+  create: (data: {
+    name: string; description?: string; price: number; stock: number
+    imageUrl?: string; categoryId?: number
+  }) => apiRequest(`${API_CONFIG.PRODUCT_URL}/products`, { method: 'POST', body: JSON.stringify(data) }),
+
+  update: (id: number, data: {
+    name: string; description?: string; price: number; stock: number
+    imageUrl?: string; categoryId?: number
+  }) => apiRequest(`${API_CONFIG.PRODUCT_URL}/products/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+
+  delete: (id: number) =>
+    apiRequest(`${API_CONFIG.PRODUCT_URL}/products/${id}`, { method: 'DELETE' }),
+
+  uploadImage: async (file: File): Promise<{ imageUrl: string }> => {
+    const token = getToken()
+    const form = new FormData()
+    form.append('file', file)
+    const res = await fetch(`${API_CONFIG.PRODUCT_URL}/products/upload-image`, {
+      method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: form,
+    })
+    if (!res.ok) throw new Error('Upload ảnh thất bại')
+    return res.json()
+  },
+
+  // ← thêm mới
+  getCategories: (): Promise<Category[]> =>
+    apiRequest(`${API_CONFIG.PRODUCT_URL}/categories`),
 }
 
 export const orderService = {
@@ -180,7 +220,7 @@ const CartContext = createContext<CartContextType | null>(null)
 // ==================== AUTH PROVIDER ====================
 function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser]       = useState<User | null>(null)
-  const [loading, setLoading] = useState(true) // bắt đầu true, chờ đọc localStorage
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     try {
@@ -189,7 +229,7 @@ function AuthProvider({ children }: { children: ReactNode }) {
     } catch {
       localStorage.removeItem('shop_user')
     } finally {
-      setLoading(false) // chỉ false sau khi đọc xong
+      setLoading(false)
     }
   }, [])
 
@@ -245,9 +285,7 @@ function CartProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  useEffect(() => {
-    refreshCart()
-  }, [refreshCart])
+  useEffect(() => { refreshCart() }, [refreshCart])
 
   const addToCart = async (product: Product, quantity = 1) => {
     if (!getToken()) { window.location.href = '/login'; return }
@@ -315,7 +353,6 @@ export function useRequireAuth() {
   const { isAuth, loading } = useAuth()
   const router = useRouter()
   useEffect(() => {
-    // Chờ loading xong hẳn mới check — tránh redirect sớm khi chưa đọc xong localStorage
     if (loading) return
     if (!isAuth) router.push('/login')
   }, [isAuth, loading, router])

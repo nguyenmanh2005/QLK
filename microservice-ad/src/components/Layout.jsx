@@ -1,17 +1,19 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Users, Package, ShoppingCart, LayoutDashboard, LogOut, Store, Truck } from 'lucide-react';
+import { Users, Package, ShoppingCart, LayoutDashboard, LogOut, Store, Truck, QrCode, Tag } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useGlobalLoading } from '../context/LoadingContext';
 import { useLoadingCursor } from '../components/UI';
 import toast from 'react-hot-toast';
 
 const navItems = [
-  { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/users',     icon: Users,           label: 'Users' },
-  { to: '/sellers',   icon: Store,           label: 'Sellers' },
-  { to: '/shippers',  icon: Truck,           label: 'Shippers' },
-  { to: '/products',  icon: Package,         label: 'Products' },
-  { to: '/orders',    icon: ShoppingCart,    label: 'Orders' },
+  { to: '/dashboard',  icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/users',      icon: Users,           label: 'Users' },
+  { to: '/sellers',    icon: Store,           label: 'Sellers' },
+  { to: '/shippers',   icon: Truck,           label: 'Shippers' },
+  { to: '/products',   icon: Package,         label: 'Products' },
+  { to: '/categories', icon: Tag,             label: 'Danh mục' },
+  { to: '/orders',     icon: ShoppingCart,    label: 'Orders' },
+  { to: '/qr',         icon: QrCode,          label: 'QR Thanh toán' },
 ];
 
 export const Layout = ({ children }) => {

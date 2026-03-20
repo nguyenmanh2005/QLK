@@ -30,6 +30,15 @@ namespace SellerService.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("AccountName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AccountNo")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("BankCode")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -44,6 +53,18 @@ namespace SellerService.Migrations
                     b.Property<string>("Password")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("QrApprovedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("QrRejectedReason")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("QrStatus")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("QrSubmittedAt")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
