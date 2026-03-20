@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Store, LayoutDashboard, Package, ShoppingBag, LogOut } from 'lucide-react'
+import { Store, LayoutDashboard, Package, ShoppingBag, QrCode, LogOut, BarChart3 } from 'lucide-react'
 import { useAuth } from '@/components/providers'
 import { cn } from '@/lib/utils'
 
@@ -11,9 +11,11 @@ export function Sidebar() {
   const pathname = usePathname()
 
   const nav = [
-    { href: '/dashboard', label: 'Dashboard',  icon: LayoutDashboard },
-    { href: '/products',  label: 'Sản phẩm',   icon: Package },
-    { href: '/orders',    label: 'Đơn hàng',    icon: ShoppingBag },
+    { href: '/dashboard', label: 'Dashboard',      icon: LayoutDashboard },
+    { href: '/products',  label: 'Sản phẩm',       icon: Package },
+    { href: '/orders',    label: 'Đơn hàng',        icon: ShoppingBag },
+    { href: '/stats',     label: 'Thống kê',        icon: BarChart3 },
+    { href: '/qr',        label: 'Thanh toán QR',   icon: QrCode },
   ]
 
   return (

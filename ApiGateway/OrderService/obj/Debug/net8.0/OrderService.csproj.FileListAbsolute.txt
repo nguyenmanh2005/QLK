@@ -286,4 +286,3 @@ D:\3\QLK\ApiGateway\OrderService\obj\Debug\net8.0\refint\OrderService.dll
 D:\3\QLK\ApiGateway\OrderService\obj\Debug\net8.0\OrderService.pdb
 D:\3\QLK\ApiGateway\OrderService\obj\Debug\net8.0\OrderService.genruntimeconfig.cache
 D:\3\QLK\ApiGateway\OrderService\obj\Debug\net8.0\ref\OrderService.dll
-D:\3\QLK\ApiGateway\OrderService\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt

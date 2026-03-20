@@ -16,8 +16,18 @@ interface Product {
   description?: string
   price: number
   stock: number
+  categoryId?: number
+  categoryName?: string
   imageUrl?: string
   sellerId?: number
+}
+
+export interface Category {
+  id: number
+  name: string
+  description?: string
+  imageUrl?: string
+  sortOrder: number
 }
 
 interface Order {
@@ -115,6 +125,9 @@ export const productService = {
     if (!res.ok) throw new Error('Upload thất bại')
     return res.json()
   },
+  // ✅ dùng API.PRODUCT thay vì API.SELLER
+  getCategories: (): Promise<Category[]> =>
+    apiRequest(`${API.PRODUCT}/categories`),
 }
 
 export const orderService = {
@@ -126,13 +139,27 @@ export const orderService = {
     }),
 }
 
+export const qrService = {
+  getStatus: () =>
+    apiRequest(`${API.SELLER}/qr/status`),
+  register: (data: { bankCode: string; accountNo: string; accountName: string }) =>
+    apiRequest(`${API.SELLER}/qr/register`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+}
+
 function AuthProvider({ children }: { children: ReactNode }) {
-  const [seller, setSeller] = useState<Seller | null>(() => {
-    if (typeof window === 'undefined') return null
-    const saved = localStorage.getItem('seller_user')
-    return saved ? JSON.parse(saved) : null
-  })
-  const [loading, setLoading] = useState(false)
+  const [seller, setSeller] = useState<Seller | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('seller_user')
+      if (saved) setSeller(JSON.parse(saved))
+    } catch { }
+    finally { setLoading(false) }
+  }, [])
 
   const login = async (email: string, password: string) => {
     setLoading(true)

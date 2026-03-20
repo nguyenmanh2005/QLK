@@ -2,26 +2,32 @@
 
 import { useEffect, useState } from 'react'
 import { Plus, Pencil, Trash2, Loader2, Package, X } from 'lucide-react'
-import { useRequireAuth, productService, Providers, PRODUCT_BASE, type Product } from '@/components/providers'
+import { useRequireAuth, productService, Providers, PRODUCT_BASE, type Product, type Category } from '@/components/providers'
 import { Sidebar } from '@/components/sidebar'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
-// Đây là trang quản lý sản phẩm, nơi người bán có thể xem danh sách sản phẩm của mình, tạo mới, chỉnh sửa hoặc xóa sản phẩm.
-function ProductModal({ isOpen, onClose, onSaved, editProduct }: { // 
+
+function ProductModal({ isOpen, onClose, onSaved, editProduct }: {
   isOpen: boolean
   onClose: () => void
   onSaved: () => void
-  editProduct: Product | null 
-})
- { // Đây là component modal dùng để tạo mới hoặc chỉnh sửa sản phẩm. 
- // Nếu editProduct có giá trị thì sẽ điền form để chỉnh sửa, nếu không thì sẽ để trống để tạo mới. 
- // Khi submit sẽ gọi API tương ứng và sau đó gọi onSaved để load lại danh sách sản phẩm, rồi đóng modal.
+  editProduct: Product | null
+}) {
   const isEdit = !!editProduct
-  const [form, setForm]           = useState({ name: '', description: '', price: '', stock: '', imageUrl: '' })
+  const [form, setForm]           = useState({ name: '', description: '', price: '', stock: '', imageUrl: '', categoryId: '' })
+  const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading]     = useState(false)
   const [imageMode, setImageMode] = useState<'url' | 'upload'>('url')
   const [uploading, setUploading] = useState(false)
-// Khi mở modal, nếu có editProduct thì điền form, nếu không thì để trống
+
+  // Load categories khi mở modal
+  useEffect(() => {
+    if (!isOpen) return
+    productService.getCategories()
+      .then(setCategories)
+      .catch(() => toast.error('Không tải được danh mục'))
+  }, [isOpen])
+
   useEffect(() => {
     if (!isOpen) return
     setImageMode('url')
@@ -31,9 +37,10 @@ function ProductModal({ isOpen, onClose, onSaved, editProduct }: { //
       price:       String(editProduct.price),
       stock:       String(editProduct.stock),
       imageUrl:    editProduct.imageUrl || '',
-    } : { name: '', description: '', price: '', stock: '', imageUrl: '' })
+      categoryId:  editProduct.categoryId ? String(editProduct.categoryId) : '',
+    } : { name: '', description: '', price: '', stock: '', imageUrl: '', categoryId: '' })
   }, [editProduct, isOpen])
-// Hàm xử lý khi chọn file ảnh để upload
+
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -48,7 +55,7 @@ function ProductModal({ isOpen, onClose, onSaved, editProduct }: { //
       setUploading(false)
     }
   }
-// Hàm xử lý khi submit form, nếu isEdit thì gọi API update, nếu không thì gọi API create
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -59,6 +66,7 @@ function ProductModal({ isOpen, onClose, onSaved, editProduct }: { //
         price:       parseFloat(form.price),
         stock:       parseInt(form.stock),
         imageUrl:    form.imageUrl || undefined,
+        categoryId:  form.categoryId ? parseInt(form.categoryId) : undefined,
       }
       if (isEdit) await productService.update(editProduct!.id, data)
       else        await productService.create(data)
@@ -70,17 +78,17 @@ function ProductModal({ isOpen, onClose, onSaved, editProduct }: { //
       setLoading(false)
     }
   }
-// Đây là phần hiển thị ảnh xem trước nếu đã có URL ảnh, và có nút để xóa ảnh nếu muốn thay đổi
+
   const previewSrc = form.imageUrl
     ? (form.imageUrl.startsWith('/') ? `${PRODUCT_BASE}${form.imageUrl}` : form.imageUrl)
     : null
-// Nếu modal không mở thì không render gì cả
+
   if (!isOpen) return null
-// Đây là phần giao diện của modal, bao gồm form nhập thông tin sản phẩm và các nút để lưu hoặc hủy
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full max-w-md rounded-2xl bg-slate-900 border border-slate-800 p-6 shadow-2xl">
+      <div className="relative w-full max-w-md rounded-2xl bg-slate-900 border border-slate-800 p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-lg font-semibold text-white">{isEdit ? 'Sửa sản phẩm' : 'Thêm sản phẩm'}</h2>
           <button onClick={onClose} className="text-slate-400 hover:text-white transition-colors">
@@ -89,6 +97,7 @@ function ProductModal({ isOpen, onClose, onSaved, editProduct }: { //
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Tên sản phẩm */}
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-1.5">Tên sản phẩm *</label>
             <input required value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
@@ -96,6 +105,7 @@ function ProductModal({ isOpen, onClose, onSaved, editProduct }: { //
               className="w-full h-11 rounded-xl bg-slate-800 border border-slate-700 px-4 text-white placeholder:text-slate-500 focus:outline-none focus:border-indigo-500 transition-all text-sm" />
           </div>
 
+          {/* Mô tả */}
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-1.5">Mô tả</label>
             <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
@@ -103,13 +113,29 @@ function ProductModal({ isOpen, onClose, onSaved, editProduct }: { //
               className="w-full rounded-xl bg-slate-800 border border-slate-700 px-4 py-3 text-white placeholder:text-slate-500 focus:outline-none focus:border-indigo-500 transition-all text-sm resize-none" />
           </div>
 
+          {/* Danh mục */}
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-1.5">Danh mục</label>
+            <select value={form.categoryId}
+              onChange={e => setForm(f => ({ ...f, categoryId: e.target.value }))}
+              className="w-full h-11 rounded-xl bg-slate-800 border border-slate-700 px-4 text-white focus:outline-none focus:border-indigo-500 transition-all text-sm">
+              <option value="">-- Không chọn danh mục --</option>
+              {categories.map(c => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Hình ảnh */}
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-1.5">Hình ảnh</label>
             <div className="flex gap-2 mb-2">
               {(['url', 'upload'] as const).map(mode => (
                 <button key={mode} type="button" onClick={() => setImageMode(mode)}
                   className={cn("text-xs px-3 py-1.5 rounded-lg border transition-all",
-                    imageMode === mode ? "bg-indigo-600 text-white border-indigo-600" : "bg-slate-800 text-slate-400 border-slate-700 hover:border-slate-600"
+                    imageMode === mode
+                      ? "bg-indigo-600 text-white border-indigo-600"
+                      : "bg-slate-800 text-slate-400 border-slate-700 hover:border-slate-600"
                   )}>
                   {mode === 'url' ? 'Nhập URL' : 'Tải lên'}
                 </button>
@@ -137,6 +163,7 @@ function ProductModal({ isOpen, onClose, onSaved, editProduct }: { //
             )}
           </div>
 
+          {/* Giá & Tồn kho */}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-1.5">Giá (VNĐ) *</label>
@@ -161,7 +188,8 @@ function ProductModal({ isOpen, onClose, onSaved, editProduct }: { //
             </button>
             <button type="submit" disabled={loading || uploading}
               className="flex-1 h-11 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium transition-all disabled:opacity-60 flex items-center justify-center gap-2">
-              {loading ? <><Loader2 className="h-4 w-4 animate-spin" />Đang lưu...</> : isEdit ? 'Cập nhật' : 'Tạo mới'}
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+              {isEdit ? 'Cập nhật' : 'Tạo sản phẩm'}
             </button>
           </div>
         </form>
@@ -171,14 +199,14 @@ function ProductModal({ isOpen, onClose, onSaved, editProduct }: { //
 }
 
 function ProductsContent() {
-  const { isAuth, loading } = useRequireAuth()
-  const [products, setProducts]       = useState<Product[]>([])
+  const { isAuth, loading }       = useRequireAuth()
+  const [products, setProducts]   = useState<Product[]>([])
   const [loadingData, setLoadingData] = useState(true)
-  const [modal, setModal]             = useState(false)
+  const [modal, setModal]         = useState(false)
   const [editProduct, setEditProduct] = useState<Product | null>(null)
-  const [deleteId, setDeleteId]       = useState<number | null>(null)
-  const [deleting, setDeleting]       = useState(false)
-  const [search, setSearch]           = useState('')
+  const [deleteId, setDeleteId]   = useState<number | null>(null)
+  const [deleting, setDeleting]   = useState(false)
+  const [search, setSearch]       = useState('')
 
   const load = async () => {
     try {
@@ -240,7 +268,7 @@ function ProductsContent() {
         <table className="w-full">
           <thead>
             <tr className="border-b border-slate-800">
-              {['#', 'Ảnh', 'Tên sản phẩm', 'Giá', 'Tồn kho', 'Thao tác'].map(h => (
+              {['#', 'Ảnh', 'Tên sản phẩm', 'Danh mục', 'Giá', 'Tồn kho', 'Thao tác'].map(h => (
                 <th key={h} className="px-4 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
                   {h}
                 </th>
@@ -250,7 +278,7 @@ function ProductsContent() {
           <tbody className="divide-y divide-slate-800">
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-16 text-center text-slate-400">
+                <td colSpan={7} className="px-4 py-16 text-center text-slate-400">
                   <Package className="h-10 w-10 mx-auto mb-3 opacity-40" />
                   Chưa có sản phẩm nào
                 </td>
@@ -263,15 +291,20 @@ function ProductsContent() {
                 <tr key={p.id} className="hover:bg-slate-800/50 transition-colors">
                   <td className="px-4 py-3 text-slate-500 text-sm">{i + 1}</td>
                   <td className="px-4 py-3">
-                    {imgSrc ? (
-                      <img src={imgSrc} alt={p.name} className="w-10 h-10 object-cover rounded-lg" />
-                    ) : (
-                      <div className="w-10 h-10 bg-slate-800 rounded-lg flex items-center justify-center text-slate-500 text-xs">N/A</div>
-                    )}
+                    {imgSrc
+                      ? <img src={imgSrc} alt={p.name} className="w-10 h-10 object-cover rounded-lg" />
+                      : <div className="w-10 h-10 bg-slate-800 rounded-lg flex items-center justify-center text-slate-500 text-xs">N/A</div>
+                    }
                   </td>
                   <td className="px-4 py-3">
                     <p className="font-medium text-white text-sm">{p.name}</p>
                     {p.description && <p className="text-xs text-slate-400 truncate max-w-xs">{p.description}</p>}
+                  </td>
+                  <td className="px-4 py-3">
+                    {p.categoryName
+                      ? <span className="text-xs px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-400">{p.categoryName}</span>
+                      : <span className="text-xs text-slate-500">—</span>
+                    }
                   </td>
                   <td className="px-4 py-3 text-sm font-medium text-white">
                     {parseFloat(String(p.price)).toLocaleString('vi-VN')}đ
@@ -302,10 +335,8 @@ function ProductsContent() {
         </table>
       </div>
 
-      {/* Product Modal */}
       <ProductModal isOpen={modal} onClose={() => setModal(false)} onSaved={load} editProduct={editProduct} />
 
-      {/* Delete Confirm */}
       {deleteId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setDeleteId(null)} />

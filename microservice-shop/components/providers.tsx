@@ -11,7 +11,15 @@ interface User {
   email: string
 }
 
-interface Product {
+export interface Category {
+  id: number
+  name: string
+  description?: string
+  imageUrl?: string
+  sortOrder: number
+}
+
+export interface Product {
   id: number
   name: string
   description?: string
@@ -19,10 +27,27 @@ interface Product {
   stock: number
   imageUrl?: string
   sellerId?: number
+  categoryId?: number
+  categoryName?: string
 }
 
-interface CartItem extends Product {
+export interface CartItem {
+  productId: string
+  sellerId: string
+  sellerName: string
+  name: string
+  price: number
+  imageUrl?: string
+  stock: number
   quantity: number
+  subtotal: number
+}
+
+export interface SellerGroup {
+  sellerId: string
+  sellerName: string
+  items: CartItem[]
+  subTotal: number
 }
 
 interface Order {
@@ -50,6 +75,122 @@ interface Review {
   createdAt: string
 }
 
+// ==================== API CONFIG ====================
+const API_CONFIG = {
+  USER_URL:    'http://localhost:5268/api',
+  PRODUCT_URL: 'http://localhost:5159/api',
+  ORDER_URL:   'http://localhost:5291/api',
+  CART_URL:    'http://localhost:5155/gateway/cart',
+}
+
+export const PRODUCT_BASE_URL = 'http://localhost:5159'
+export const PRODUCT_BASE     = PRODUCT_BASE_URL  // alias giữ tương thích
+
+function getToken() {
+  if (typeof window === 'undefined') return null
+  return localStorage.getItem('shop_token')
+}
+
+async function apiRequest(url: string, options?: RequestInit, redirectOn401 = true) {
+  const token = getToken()
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+    ...(token && { Authorization: `Bearer ${token}` }),
+    ...(options?.headers || {}),
+  }
+  const response = await fetch(url, { ...options, headers })
+  if (!response.ok) {
+    if (response.status === 401 && redirectOn401 && typeof window !== 'undefined') {
+      localStorage.removeItem('shop_token')
+      localStorage.removeItem('shop_user')
+      window.location.href = '/login'
+    }
+    const error = await response.json().catch(() => ({ message: 'Request failed' }))
+    throw new Error(error.message || 'Request failed')
+  }
+  return response.json()
+}
+
+// ==================== API SERVICES ====================
+export const authService = {
+  login: (data: { email: string; password: string }) =>
+    apiRequest(`${API_CONFIG.USER_URL}/users/login`, { method: 'POST', body: JSON.stringify(data) }),
+  register: (data: { name: string; email: string; password: string }) =>
+    apiRequest(`${API_CONFIG.USER_URL}/users`, { method: 'POST', body: JSON.stringify(data) }),
+}
+
+export const userService = {
+  getById: (id: number) => apiRequest(`${API_CONFIG.USER_URL}/users/${id}`),
+}
+
+export const productService = {
+  getAll:      ()                 => apiRequest(`${API_CONFIG.PRODUCT_URL}/products`),
+  getById:     (id: number)       => apiRequest(`${API_CONFIG.PRODUCT_URL}/products/${id}`),
+  getBySeller: (sellerId: number) => apiRequest(`${API_CONFIG.PRODUCT_URL}/products/seller/${sellerId}`),
+
+  create: (data: {
+    name: string; description?: string; price: number; stock: number
+    imageUrl?: string; categoryId?: number
+  }) => apiRequest(`${API_CONFIG.PRODUCT_URL}/products`, { method: 'POST', body: JSON.stringify(data) }),
+
+  update: (id: number, data: {
+    name: string; description?: string; price: number; stock: number
+    imageUrl?: string; categoryId?: number
+  }) => apiRequest(`${API_CONFIG.PRODUCT_URL}/products/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+
+  delete: (id: number) =>
+    apiRequest(`${API_CONFIG.PRODUCT_URL}/products/${id}`, { method: 'DELETE' }),
+
+  uploadImage: async (file: File): Promise<{ imageUrl: string }> => {
+    const token = getToken()
+    const form = new FormData()
+    form.append('file', file)
+    const res = await fetch(`${API_CONFIG.PRODUCT_URL}/products/upload-image`, {
+      method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: form,
+    })
+    if (!res.ok) throw new Error('Upload ảnh thất bại')
+    return res.json()
+  },
+
+  // ← thêm mới
+  getCategories: (): Promise<Category[]> =>
+    apiRequest(`${API_CONFIG.PRODUCT_URL}/categories`),
+}
+
+export const orderService = {
+  create: (data: { userId: number; productId: number; quantity: number }) =>
+    apiRequest(`${API_CONFIG.ORDER_URL}/orders`, { method: 'POST', body: JSON.stringify(data) }),
+  getByUser: (userId: string) =>
+    apiRequest(`${API_CONFIG.ORDER_URL}/orders/user/${userId}`),
+  cancel: (orderId: number) =>
+    apiRequest(`${API_CONFIG.ORDER_URL}/orders/${orderId}/cancel`, { method: 'PATCH' }),
+}
+
+export const reviewService = {
+  getByProduct: (productId: number) =>
+    apiRequest(`${API_CONFIG.PRODUCT_URL}/reviews/product/${productId}`),
+  hasReviewed: (orderId: number) =>
+    apiRequest(`${API_CONFIG.PRODUCT_URL}/reviews/check/${orderId}`),
+  create: (data: {
+    productId: number; userId: number; userName: string; orderId: number
+    title: string; comment: string; rating: number; imageUrl?: string
+  }) => apiRequest(`${API_CONFIG.PRODUCT_URL}/reviews`, { method: 'POST', body: JSON.stringify(data) }),
+  uploadImage: async (file: File): Promise<{ imageUrl: string }> => {
+    const token = getToken()
+    const form = new FormData()
+    form.append('file', file)
+    const res = await fetch(`${API_CONFIG.PRODUCT_URL}/reviews/upload-image`, {
+      method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: form,
+    })
+    if (!res.ok) throw new Error('Upload ảnh thất bại')
+    return res.json()
+  },
+}
+
 // ==================== AUTH CONTEXT ====================
 interface AuthContextType {
   user: User | null
@@ -59,114 +200,22 @@ interface AuthContextType {
   logout: () => void
   isAuth: boolean
 }
-
 const AuthContext = createContext<AuthContextType | null>(null)
 
 // ==================== CART CONTEXT ====================
 interface CartContextType {
   items: CartItem[]
-  addToCart: (product: Product, quantity?: number) => void
-  updateQty: (productId: number, quantity: number) => void
-  removeFromCart: (productId: number) => void
-  clearCart: () => void
+  sellerGroups: SellerGroup[]
   totalItems: number
   totalPrice: number
+  loading: boolean
+  addToCart: (product: Product, quantity?: number) => Promise<void>
+  updateQty: (productId: string, quantity: number) => Promise<void>
+  removeFromCart: (productId: string) => Promise<void>
+  clearCart: () => Promise<void>
+  refreshCart: () => Promise<void>
 }
-
 const CartContext = createContext<CartContextType | null>(null)
-
-// ==================== API CONFIG ====================
-const API_CONFIG = {
-  USER_URL:    'http://localhost:5268/api',
-  PRODUCT_URL: 'http://localhost:5159/api',
-  ORDER_URL:   'http://localhost:5291/api',
-}
-
-export const PRODUCT_BASE_URL = 'http://localhost:5159'
-
-async function apiRequest(baseUrl: string, endpoint: string, options?: RequestInit) {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('shop_token') : null
-  const headers: HeadersInit = {
-    'Content-Type': 'application/json',
-    ...(token && { Authorization: `Bearer ${token}` }),
-    ...(options?.headers || {}),
-  }
-
-  const response = await fetch(`${baseUrl}${endpoint}`, { ...options, headers })
-
-  if (!response.ok) {
-    if (response.status === 401 && typeof window !== 'undefined') {
-      localStorage.removeItem('shop_token')
-      localStorage.removeItem('shop_user')
-      window.location.href = '/login'
-    }
-    const error = await response.json().catch(() => ({ message: 'Request failed' }))
-    throw new Error(error.message || 'Request failed')
-  }
-
-  return response.json()
-}
-
-// ==================== API SERVICES ====================
-export const authService = {
-  login: (data: { email: string; password: string }) =>
-    apiRequest(API_CONFIG.USER_URL, '/users/login', { method: 'POST', body: JSON.stringify(data) }),
-  register: (data: { name: string; email: string; password: string }) =>
-    apiRequest(API_CONFIG.USER_URL, '/users', { method: 'POST', body: JSON.stringify(data) }),
-}
-
-export const userService = {
-  getById: (id: number) =>
-    apiRequest(API_CONFIG.USER_URL, `/users/${id}`),
-}
-
-export const productService = {
-  getAll:  ()           => apiRequest(API_CONFIG.PRODUCT_URL, '/products'),
-  getById: (id: number) => apiRequest(API_CONFIG.PRODUCT_URL, `/products/${id}`),
-  getBySeller: (sellerId: number) =>
-    apiRequest(API_CONFIG.PRODUCT_URL, `/products/seller/${sellerId}`),
-}
-
-export const orderService = {
-  create: (data: { userId: number; productId: number; quantity: number }) =>
-    apiRequest(API_CONFIG.ORDER_URL, '/orders', { method: 'POST', body: JSON.stringify(data) }),
-  getByUser: (userId: string) =>
-    apiRequest(API_CONFIG.ORDER_URL, `/orders/user/${userId}`),
-  cancel: (orderId: number) =>
-    apiRequest(API_CONFIG.ORDER_URL, `/orders/${orderId}/cancel`, { method: 'PATCH' }),
-}
-
-export const reviewService = {
-  getByProduct: (productId: number) =>
-    apiRequest(API_CONFIG.PRODUCT_URL, `/reviews/product/${productId}`),
-  hasReviewed: (orderId: number) =>
-    apiRequest(API_CONFIG.PRODUCT_URL, `/reviews/check/${orderId}`),
-  create: (data: {
-    productId: number
-    userId: number
-    userName: string
-    orderId: number
-    title: string
-    comment: string
-    rating: number
-    imageUrl?: string
-  }) => apiRequest(API_CONFIG.PRODUCT_URL, '/reviews', {
-    method: 'POST',
-    body: JSON.stringify(data),
-  }),
-  uploadImage: async (file: File): Promise<{ imageUrl: string }> => {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('shop_token') : null
-    const form  = new FormData()
-    form.append('file', file)
-    const res = await fetch(`${API_CONFIG.PRODUCT_URL}/reviews/upload-image`, {
-      method:  'POST',
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-      body:    form,
-    })
-    if (!res.ok) throw new Error('Upload ảnh thất bại')
-    return res.json()
-  },
-}
 
 // ==================== AUTH PROVIDER ====================
 function AuthProvider({ children }: { children: ReactNode }) {
@@ -174,9 +223,14 @@ function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('shop_user')
-    if (savedUser) setUser(JSON.parse(savedUser))
-    setLoading(false)
+    try {
+      const savedUser = localStorage.getItem('shop_user')
+      if (savedUser) setUser(JSON.parse(savedUser))
+    } catch {
+      localStorage.removeItem('shop_user')
+    } finally {
+      setLoading(false)
+    }
   }, [])
 
   const login = async (email: string, password: string) => {
@@ -212,67 +266,71 @@ function AuthProvider({ children }: { children: ReactNode }) {
 }
 
 // ==================== CART PROVIDER ====================
-function CartProvider({ children }: { children: ReactNode }) {
-  const [items, setItems]   = useState<CartItem[]>([])
-  const [userId, setUserId] = useState<string | null>(null)
+const emptyCart = { items: [], sellerGroups: [], totalPrice: 0, totalItems: 0 }
 
-  useEffect(() => {
-    const syncUser = () => {
-      const savedUser = localStorage.getItem('shop_user')
-      const newId = savedUser ? JSON.parse(savedUser).id : null
-      setUserId(newId)
+function CartProvider({ children }: { children: ReactNode }) {
+  const [cart, setCart]       = useState(emptyCart)
+  const [loading, setLoading] = useState(false)
+
+  const refreshCart = useCallback(async () => {
+    if (!getToken()) return
+    try {
+      setLoading(true)
+      const data = await apiRequest(`${API_CONFIG.CART_URL}`, undefined, false)
+      setCart(data)
+    } catch {
+      // CartService chưa chạy hoặc lỗi — giữ cart trống, không crash app
+    } finally {
+      setLoading(false)
     }
-    syncUser()
-    window.addEventListener('storage', syncUser)
-    return () => window.removeEventListener('storage', syncUser)
   }, [])
 
-  useEffect(() => {
-    if (!userId) { setItems([]); return }
-    try {
-      const saved = localStorage.getItem(`shop_cart_${userId}`)
-      setItems(saved ? JSON.parse(saved) : [])
-    } catch { setItems([]) }
-  }, [userId])
+  useEffect(() => { refreshCart() }, [refreshCart])
 
-  useEffect(() => {
-    if (!userId) return
-    localStorage.setItem(`shop_cart_${userId}`, JSON.stringify(items))
-  }, [items, userId])
-
-  const addToCart = (product: Product, quantity = 1) => {
-    if (!userId) { window.location.href = '/login'; return }
-    setItems(prev => {
-      const existing = prev.find(i => i.id === product.id)
-      if (existing) {
-        return prev.map(i =>
-          i.id === product.id
-            ? { ...i, quantity: Math.min(i.quantity + quantity, product.stock) }
-            : i
-        )
-      }
-      return [...prev, { ...product, quantity }]
-    })
+  const addToCart = async (product: Product, quantity = 1) => {
+    if (!getToken()) { window.location.href = '/login'; return }
+    await apiRequest(`${API_CONFIG.CART_URL}/add`, {
+      method: 'POST',
+      body: JSON.stringify({
+        productId: String(product.id),
+        sellerId:  String(product.sellerId ?? ''),
+        quantity,
+      }),
+    }, false)
+    await refreshCart()
   }
 
-  const updateQty = (productId: number, quantity: number) => {
-    if (quantity < 1) { removeFromCart(productId); return }
-    setItems(prev => prev.map(i => i.id === productId ? { ...i, quantity } : i))
+  const updateQty = async (productId: string, quantity: number) => {
+    await apiRequest(`${API_CONFIG.CART_URL}/item/${productId}`, {
+      method: 'PUT',
+      body: JSON.stringify({ quantity }),
+    }, false)
+    await refreshCart()
   }
 
-  const removeFromCart = (productId: number) =>
-    setItems(prev => prev.filter(i => i.id !== productId))
-
-  const clearCart = () => {
-    setItems([])
-    if (userId) localStorage.removeItem(`shop_cart_${userId}`)
+  const removeFromCart = async (productId: string) => {
+    await apiRequest(`${API_CONFIG.CART_URL}/item/${productId}`, { method: 'DELETE' }, false)
+    await refreshCart()
   }
 
-  const totalItems = items.reduce((sum, i) => sum + i.quantity, 0)
-  const totalPrice = items.reduce((sum, i) => sum + i.price * i.quantity, 0)
+  const clearCart = async () => {
+    await apiRequest(`${API_CONFIG.CART_URL}`, { method: 'DELETE' }, false)
+    setCart(emptyCart)
+  }
 
   return (
-    <CartContext.Provider value={{ items, addToCart, updateQty, removeFromCart, clearCart, totalItems, totalPrice }}>
+    <CartContext.Provider value={{
+      items:        cart.items,
+      sellerGroups: cart.sellerGroups,
+      totalItems:   cart.totalItems,
+      totalPrice:   cart.totalPrice,
+      loading,
+      addToCart,
+      updateQty,
+      removeFromCart,
+      clearCart,
+      refreshCart,
+    }}>
       {children}
     </CartContext.Provider>
   )
@@ -280,22 +338,23 @@ function CartProvider({ children }: { children: ReactNode }) {
 
 // ==================== HOOKS ====================
 export function useAuth() {
-  const context = useContext(AuthContext)
-  if (!context) throw new Error('useAuth must be used within AuthProvider')
-  return context
+  const ctx = useContext(AuthContext)
+  if (!ctx) throw new Error('useAuth must be used within AuthProvider')
+  return ctx
 }
 
 export function useCart() {
-  const context = useContext(CartContext)
-  if (!context) throw new Error('useCart must be used within CartProvider')
-  return context
+  const ctx = useContext(CartContext)
+  if (!ctx) throw new Error('useCart must be used within CartProvider')
+  return ctx
 }
 
 export function useRequireAuth() {
   const { isAuth, loading } = useAuth()
   const router = useRouter()
   useEffect(() => {
-    if (!loading && !isAuth) router.push('/login')
+    if (loading) return
+    if (!isAuth) router.push('/login')
   }, [isAuth, loading, router])
   return { isAuth, loading }
 }
@@ -322,4 +381,4 @@ export function Providers({ children }: { children: ReactNode }) {
 }
 
 // ==================== TYPES EXPORT ====================
-export type { User, Product, CartItem, Order, Review }
+export type { User, Order, Review }

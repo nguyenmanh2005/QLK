@@ -10,9 +10,10 @@ import { SellersPage } from './pages/SellersPage';
 import { ShippersPage } from './pages/ShippersPage';
 import { ProductsPage } from './pages/ProductsPage';
 import { OrdersPage } from './pages/OrdersPage';
-import { Spinner } from './components/UI';
-// Thêm import này
+import { QrPage } from './pages/QrPage';
+import { CategoriesPage } from './pages/Categoriespage';
 import { NotFoundPage } from './pages/NotFoundPage';
+import { Spinner } from './components/UI';
 
 const ProtectedRoute = ({ children }) => {
   const { isAuth, loading } = useAuth();
@@ -34,12 +35,15 @@ const AppRoutes = () => (
   <Routes>
     <Route path="/login"    element={<PublicRoute><LoginPage /></PublicRoute>} />
     <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
-    <Route path="/dashboard" element={<ProtectedRoute><Layout><DashboardPage /></Layout></ProtectedRoute>} />
-    <Route path="/users"     element={<ProtectedRoute><Layout><UsersPage /></Layout></ProtectedRoute>} />
-    <Route path="/sellers"   element={<ProtectedRoute><Layout><SellersPage /></Layout></ProtectedRoute>} />
-    <Route path="/shippers"  element={<ProtectedRoute><Layout><ShippersPage /></Layout></ProtectedRoute>} />
-    <Route path="/products"  element={<ProtectedRoute><Layout><ProductsPage /></Layout></ProtectedRoute>} />
-    <Route path="/orders"    element={<ProtectedRoute><Layout><OrdersPage /></Layout></ProtectedRoute>} />
+    <Route path="/dashboard"   element={<ProtectedRoute><Layout><DashboardPage /></Layout></ProtectedRoute>} />
+    <Route path="/users"       element={<ProtectedRoute><Layout><UsersPage /></Layout></ProtectedRoute>} />
+    <Route path="/sellers"     element={<ProtectedRoute><Layout><SellersPage /></Layout></ProtectedRoute>} />
+    <Route path="/shippers"    element={<ProtectedRoute><Layout><ShippersPage /></Layout></ProtectedRoute>} />
+    <Route path="/products"    element={<ProtectedRoute><Layout><ProductsPage /></Layout></ProtectedRoute>} />
+    <Route path="/orders"      element={<ProtectedRoute><Layout><OrdersPage /></Layout></ProtectedRoute>} />
+    <Route path="/qr"          element={<ProtectedRoute><Layout><QrPage /></Layout></ProtectedRoute>} />
+    <Route path="/categories"  element={<ProtectedRoute><Layout><CategoriesPage /></Layout></ProtectedRoute>} />
+
     <Route path="/"  element={<Navigate to="/dashboard" replace />} />
     <Route path="*"  element={<NotFoundPage />} />
   </Routes>

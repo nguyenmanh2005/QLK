@@ -7,7 +7,6 @@ using UserService.Data;
 using UserService.Repositories;
 using UserService.Services;
 using FluentValidation;
-using FluentValidation.AspNetCore;
 using UserService.Validators;
 using UserService.Middlewares;
 
@@ -49,10 +48,11 @@ builder.Services.AddAuthorization();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService.Services.UserService>();
 
-// ─── Swagger với JWT ───────────────────────────────────────
+// ─── Controllers + FluentValidation ───────────────────────
 builder.Services.AddControllers();
-builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateUserValidator>();
+
+// ─── Swagger với JWT ───────────────────────────────────────
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -90,7 +90,7 @@ using (var scope = app.Services.CreateScope())
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseSwagger();
 app.UseSwaggerUI();
-app.UseCors("AllowFrontend");        // ← THÊM VÀO ĐÂY
+app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
