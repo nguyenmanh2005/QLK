@@ -8,6 +8,7 @@ interface Shipper {
   id: string
   name: string
   email: string
+  phoneNumber?: string
 }
 
 export interface Order {
@@ -75,6 +76,12 @@ export const authService = {
       }
       return r.json()
     }),
+}
+
+export const shipperService = {
+  getById: (id: string) => apiRequest(`${API_BASE}/${id}`),
+  updateProfile: (data: { name: string; phoneNumber?: string }) => 
+    apiRequest(`${API_BASE}/profile`, { method: 'PUT', body: JSON.stringify(data) }),
 }
 
 export const orderService = {

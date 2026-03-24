@@ -1,4 +1,4 @@
-﻿using System.Net.Http.Headers;
+using System.Net.Http.Headers;
 using AdminService.DTOs;
 using AdminService.Services.Interfaces;
 
@@ -42,7 +42,7 @@ public class UserAdminService : IUserAdminService
 
     public async Task<(bool Success, int StatusCode, string Body)> UpdateAsync(string token, int id, UpdatePersonDto dto)
     {
-        var res = await GetClient(token).PutAsJsonAsync($"/api/users/{id}", new
+        var res = await GetClient(token).PutAsJsonAsync($"/api/users/admin/update/{id}", new
         {
             name = dto.Name,
             email = dto.Email,

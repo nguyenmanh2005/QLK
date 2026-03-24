@@ -16,6 +16,7 @@ export function Sidebar() {
     { href: '/orders',    label: 'Đơn hàng',        icon: ShoppingBag },
     { href: '/stats',     label: 'Thống kê',        icon: BarChart3 },
     { href: '/qr',        label: 'Thanh toán QR',   icon: QrCode },
+    { href: '/profile',   label: 'Hồ sơ Cửa hàng',  icon: Store },
   ]
 
   return (

@@ -38,4 +38,20 @@ public async Task<bool> DeleteAsync(int id)
     await _db.SaveChangesAsync();
     return true;
 }
+
+    public async Task<ShipperReview> CreateReviewAsync(ShipperReview review)
+    {
+        _db.ShipperReviews.Add(review);
+        await _db.SaveChangesAsync();
+        return review;
+    }
+
+    public async Task<(double Average, int Total)> GetRatingStatsAsync(int shipperId)
+    {
+        var reviews = _db.ShipperReviews.Where(r => r.ShipperId == shipperId);
+        int total = await reviews.CountAsync();
+        if (total == 0) return (0, 0);
+        double avg = await reviews.AverageAsync(r => r.Rating);
+        return (avg, total);
+    }
 }

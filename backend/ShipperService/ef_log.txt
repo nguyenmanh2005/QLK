@@ -1,0 +1,46 @@
+Build started...
+Build succeeded.
+Done. To undo this action, use 'ef migrations remove'
+Build started...
+Build succeeded.
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (10ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (13ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT OBJECT_ID(N'[__EFMigrationsHistory]');
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT OBJECT_ID(N'[__EFMigrationsHistory]');
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT [MigrationId], [ProductVersion]
+      FROM [__EFMigrationsHistory]
+      ORDER BY [MigrationId];
+info: Microsoft.EntityFrameworkCore.Migrations[20402]
+      Applying migration '20260324073615_AddShipperReview'.
+Applying migration '20260324073615_AddShipperReview'.
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (35ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE [ShipperReviews] (
+          [Id] int NOT NULL IDENTITY,
+          [ShipperId] int NOT NULL,
+          [UserId] int NOT NULL,
+          [OrderId] int NOT NULL,
+          [Rating] int NOT NULL,
+          [Comment] nvarchar(max) NULL,
+          [CreatedAt] datetime2 NOT NULL,
+          CONSTRAINT [PK_ShipperReviews] PRIMARY KEY ([Id]),
+          CONSTRAINT [FK_ShipperReviews_Shippers_ShipperId] FOREIGN KEY ([ShipperId]) REFERENCES [Shippers] ([Id]) ON DELETE CASCADE
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (6ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE INDEX [IX_ShipperReviews_ShipperId] ON [ShipperReviews] ([ShipperId]);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (12ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+      VALUES (N'20260324073615_AddShipperReview', N'8.0.0');
+Done.

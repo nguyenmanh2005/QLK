@@ -210,11 +210,13 @@ function SellerSection({ sellerId }: { sellerId: number }) {
       <h2 className="font-serif text-xl font-bold">Thông tin người bán</h2>
 
       <div className="mt-4 flex items-center gap-4">
-        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+        <Link href={`/seller/${sellerId}`} className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 transition-transform hover:scale-105">
           <Store className="h-7 w-7 text-primary" />
-        </div>
-        <div>
-          <p className="font-semibold">{seller.name}</p>
+        </Link>
+        <div className="flex-1">
+          <Link href={`/seller/${sellerId}`} className="font-semibold text-foreground hover:text-primary transition-colors">
+            {seller.name}
+          </Link>
           <p className="text-sm text-muted-foreground">{seller.email}</p>
           <p className="mt-1 text-xs text-muted-foreground">
             {products.length} sản phẩm đang bán
@@ -230,6 +232,15 @@ function SellerSection({ sellerId }: { sellerId: number }) {
             <p className="mt-1 text-xs text-muted-foreground">Chưa có đánh giá</p>
           )}
         </div>
+        <Link 
+          href={`/seller/${sellerId}`}
+          className="ml-auto flex flex-col items-center justify-center gap-1 text-xs font-medium text-primary hover:text-primary/80 transition-colors"
+        >
+          <div className="rounded-full bg-primary/10 p-2">
+            <Store className="h-4 w-4" />
+          </div>
+          Xem Shop
+        </Link>
       </div>
 
       {products.length > 1 && (

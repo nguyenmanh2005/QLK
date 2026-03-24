@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Truck, CheckCircle2, Clock, Loader2, Package, LogOut, PackageCheck, RotateCcw } from 'lucide-react'
+import Link from 'next/link'
 import { useRequireAuth, useAuth, orderService, Providers, type Order } from '@/components/providers'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
@@ -102,15 +103,15 @@ function OrdersContent() {
     <div className="min-h-screen bg-slate-950">
       <header className="bg-slate-900 border-b border-slate-800 px-6 py-4">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <Link href="/profile" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-600">
               <Truck className="h-4 w-4 text-white" />
             </div>
             <div>
               <p className="font-semibold text-white text-sm">{shipper?.name}</p>
-              <p className="text-xs text-slate-400">Shipper Portal</p>
+              <p className="text-xs text-emerald-400 font-medium">Xem Hồ Sơ &gt;</p>
             </div>
-          </div>
+          </Link>
           <button onClick={logout}
             className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-slate-400 hover:text-red-400 hover:bg-red-400/5 transition-all text-sm">
             <LogOut className="h-4 w-4" />

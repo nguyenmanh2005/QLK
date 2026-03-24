@@ -60,10 +60,35 @@ public class UsersController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 
+    // PUT api/users/profile
+    [HttpPut("profile")]
+    [Authorize]
+    public async Task<IActionResult> UpdateProfile(UpdateProfileDto dto)
+    {
+        var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.NameIdentifier);
+        if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+            return Unauthorized();
+
+        var updated = await _service.UpdateProfileAsync(userId, dto);
+        return Ok(updated);
+    }
+
     // PUT api/users/5
     [HttpPut("{id}")]
     [Authorize]
     public async Task<IActionResult> Update(int id, UpdateUserDto dto)
+    {
+        var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.NameIdentifier);
+        if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int currentUserId) || currentUserId != id)
+            return Unauthorized("Bạn chỉ có quyền sửa thông tin của chính mình.");
+
+        var updated = await _service.UpdateAsync(id, dto);
+        return Ok(updated);
+    }
+
+    [HttpPut("admin/update/{id}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> AdminUpdate(int id, UpdateUserDto dto)
     {
         var updated = await _service.UpdateAsync(id, dto);
         return Ok(updated);

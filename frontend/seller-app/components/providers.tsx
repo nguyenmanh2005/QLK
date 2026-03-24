@@ -8,6 +8,7 @@ interface Seller {
   id: string
   name: string
   email: string
+  phoneNumber?: string
 }
 
 interface Product {
@@ -103,6 +104,12 @@ export const authService = {
       }
       return r.json()
     }),
+}
+
+export const sellerService = {
+  getById: (id: string) => apiRequest(`${API.SELLER}/${id}`),
+  updateProfile: (data: { name: string; phoneNumber?: string }) => 
+    apiRequest(`${API.SELLER}/profile`, { method: 'PUT', body: JSON.stringify(data) }),
 }
 
 export const productService = {

@@ -1,4 +1,4 @@
-﻿namespace SellerService.DTOs;
+namespace SellerService.DTOs;
 
 public class RegisterSellerDto
 {
@@ -19,6 +19,7 @@ public class SellerResponseDto
     public string   Name      { get; set; } = string.Empty;
     public string   Email     { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
+    public string? PhoneNumber { get; set; }
 
     // ─── QR fields ────────────────────────────────────────
     public string? BankCode    { get; set; }
@@ -105,4 +106,10 @@ public class ShipperDto
     public int    Id    { get; set; }
     public string Name  { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
+}
+
+public class UpdateProfileDto
+{
+    public string Name { get; set; } = string.Empty;
+    public string? PhoneNumber { get; set; }
 }

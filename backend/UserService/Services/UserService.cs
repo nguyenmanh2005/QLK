@@ -58,6 +58,19 @@ public class UserService : IUserService
         return MapToResponse(created);
     }
 
+    public async Task<UserResponseDto> UpdateProfileAsync(int id, UpdateProfileDto dto)
+    {
+        var user = await _repo.GetByIdAsync(id);
+        if (user is null)
+            throw new NotFoundException($"Không tìm thấy user với Id = {id}");
+
+        user.Name = dto.Name;
+        user.PhoneNumber = dto.PhoneNumber;
+
+        var updated = await _repo.UpdateProfileAsync(id, user);
+        return MapToResponse(updated!);
+    }
+
     public async Task<UserResponseDto> UpdateAsync(int id, UpdateUserDto dto)
     {
         var user = new User { Name = dto.Name, Email = dto.Email };
@@ -94,6 +107,7 @@ public class UserService : IUserService
         Id = user.Id,
         Name = user.Name,
         Email = user.Email,
+        PhoneNumber = user.PhoneNumber,
         CreatedAt = user.CreatedAt
     };
 

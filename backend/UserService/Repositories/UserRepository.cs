@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using UserService.Data;
 using UserService.Models;
 
@@ -32,6 +32,17 @@ public class UserRepository : IUserRepository
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
         return user;
+    }
+
+    public async Task<User?> UpdateProfileAsync(int id, User user)
+    {
+        var existing = await _context.Users.FindAsync(id);
+        if (existing is null) return null;
+
+        existing.Name = user.Name;
+        existing.PhoneNumber = user.PhoneNumber;
+        await _context.SaveChangesAsync();
+        return existing;
     }
 
     public async Task<User?> UpdateAsync(int id, User user)

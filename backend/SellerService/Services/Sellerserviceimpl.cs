@@ -1,4 +1,4 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
@@ -66,6 +66,18 @@ public class SellerServiceImpl : ISellerService
         return seller is null ? null : ToDto(seller);
     }
 
+    public async Task<SellerResponseDto?> UpdateProfileAsync(int id, UpdateProfileDto dto)
+    {
+        var seller = await _repo.GetByIdAsync(id);
+        if (seller is null) return null;
+
+        seller.Name = dto.Name;
+        seller.PhoneNumber = dto.PhoneNumber;
+
+        await _repo.UpdateAsync(seller);
+        return ToDto(seller);
+    }
+
     public async Task<SellerResponseDto?> UpdateAsync(int id, UpdateSellerDto dto)
     {
         var seller = await _repo.GetByIdAsync(id);
@@ -119,6 +131,7 @@ public class SellerServiceImpl : ISellerService
         Name        = s.Name,
         Email       = s.Email,
         CreatedAt   = s.CreatedAt,
+        PhoneNumber = s.PhoneNumber,
         BankCode    = s.BankCode,
         AccountNo   = s.AccountNo,
         AccountName = s.AccountName,

@@ -8,6 +8,9 @@ public interface IShipperService
     Task<string> LoginAsync(LoginShipperDto dto);
     Task<IEnumerable<ShipperResponseDto>> GetAllAsync();
     Task<ShipperResponseDto?> GetByIdAsync(int id);
+    Task<ShipperResponseDto?> UpdateProfileAsync(int id, UpdateProfileDto dto);
     Task<ShipperResponseDto?> UpdateAsync(int id, UpdateShipperDto dto);
     Task<bool> DeleteAsync(int id);
+    Task<Models.ShipperReview> CreateReviewAsync(int userId, CreateShipperReviewDto dto);
+    Task<ShipperRatingDto> GetRatingAsync(int shipperId);
 }

@@ -19,6 +19,7 @@ public class ShipperResponseDto
     public string   Name      { get; set; } = string.Empty;
     public string   Email     { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
+    public string? PhoneNumber { get; set; }
 }
 
 public class UpdateOrderStatusDto
@@ -43,4 +44,25 @@ public class UpdateShipperDto
     public string  Name     { get; set; } = string.Empty;
     public string  Email    { get; set; } = string.Empty;
     public string? Password { get; set; }
+}
+
+public class UpdateProfileDto
+{
+    public string Name { get; set; } = string.Empty;
+    public string? PhoneNumber { get; set; }
+}
+
+public class CreateShipperReviewDto
+{
+    public int ShipperId { get; set; }
+    public int OrderId { get; set; }
+    public int Rating { get; set; }
+    public string? Comment { get; set; }
+}
+
+public class ShipperRatingDto
+{
+    public int ShipperId { get; set; }
+    public double AverageRating { get; set; }
+    public int TotalReviews { get; set; }
 }

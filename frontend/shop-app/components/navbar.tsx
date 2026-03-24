@@ -70,7 +70,7 @@ export function Navbar() {
             {isAuth ? (
               <div className="flex items-center gap-2">
                 <Link 
-                  href="/orders" 
+                  href="/profile" 
                   className="flex items-center gap-2 rounded-full bg-secondary px-4 py-2 text-sm font-medium transition-colors hover:bg-secondary/80"
                 >
                   <User className="h-4 w-4" />

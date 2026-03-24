@@ -27,3 +27,10 @@ public class ReviewResponseDto
     public string? ImageUrl  { get; set; }
     public DateTime CreatedAt { get; set; }
 }
+
+public class SellerRatingDto
+{
+    public int SellerId { get; set; }
+    public double AverageRating { get; set; }
+    public int TotalReviews { get; set; }
+}

@@ -9,6 +9,7 @@ interface User {
   id: string
   name: string
   email: string
+  phoneNumber?: string
 }
 
 export interface Category {
@@ -58,6 +59,7 @@ interface Order {
   totalPrice: number
   productName?: string
   status: string
+  shipperId?: number
   createdAt: string
   product?: Product
 }
@@ -75,12 +77,24 @@ interface Review {
   createdAt: string
 }
 
+interface ShipperReview {
+  id: number
+  shipperId: number
+  userId: number
+  orderId: number
+  rating: number
+  comment?: string
+  createdAt: string
+}
+
 // ==================== API CONFIG ====================
 const API_CONFIG = {
   USER_URL:    'http://localhost:5268/api',
   PRODUCT_URL: 'http://localhost:5159/api',
   ORDER_URL:   'http://localhost:5291/api',
   CART_URL:    'http://localhost:5155/gateway/cart',
+  SHIPPER_URL: 'http://localhost:5184/api',
+  SELLER_URL:  'http://localhost:5183/api',
 }
 
 export const PRODUCT_BASE_URL = 'http://localhost:5159'
@@ -121,6 +135,8 @@ export const authService = {
 
 export const userService = {
   getById: (id: number) => apiRequest(`${API_CONFIG.USER_URL}/users/${id}`),
+  updateProfile: (data: { name: string; phoneNumber?: string }) => 
+    apiRequest(`${API_CONFIG.USER_URL}/users/profile`, { method: 'PUT', body: JSON.stringify(data) }),
 }
 
 export const productService = {
@@ -189,6 +205,27 @@ export const reviewService = {
     if (!res.ok) throw new Error('Upload ảnh thất bại')
     return res.json()
   },
+}
+
+export const shipperReviewService = {
+  getRating: (shipperId: number) =>
+    apiRequest(`${API_CONFIG.SHIPPER_URL}/reviews/shipper/${shipperId}`),
+  create: (data: {
+    shipperId: number; orderId: number; rating: number; comment?: string
+  }) => apiRequest(`${API_CONFIG.SHIPPER_URL}/reviews`, { method: 'POST', body: JSON.stringify(data) }),
+}
+
+export const sellerReviewService = {
+  getRating: (sellerId: number) =>
+    apiRequest(`${API_CONFIG.PRODUCT_URL}/reviews/seller/${sellerId}/rating`),
+}
+
+export const sellerService = {
+  getById: (id: number) => apiRequest(`${API_CONFIG.SELLER_URL}/seller/${id}`),
+}
+
+export const shipperService = {
+  getById: (id: number) => apiRequest(`${API_CONFIG.SHIPPER_URL}/shipper/${id}`),
 }
 
 // ==================== AUTH CONTEXT ====================
@@ -381,4 +418,4 @@ export function Providers({ children }: { children: ReactNode }) {
 }
 
 // ==================== TYPES EXPORT ====================
-export type { User, Order, Review }
+export type { User, Order, Review, ShipperReview }

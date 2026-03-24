@@ -10,4 +10,6 @@ public interface IShipperRepository
     Task<IEnumerable<Shipper>> GetAllAsync();
 Task UpdateAsync(Shipper shipper);
 Task<bool> DeleteAsync(int id);
+    Task<ShipperReview> CreateReviewAsync(ShipperReview review);
+    Task<(double Average, int Total)> GetRatingStatsAsync(int shipperId);
 }

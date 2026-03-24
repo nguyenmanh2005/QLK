@@ -66,6 +66,18 @@ public class ShipperServiceImpl : IShipperService
         return shipper is null ? null : ToDto(shipper);
     }
 
+    public async Task<ShipperResponseDto?> UpdateProfileAsync(int id, UpdateProfileDto dto)
+    {
+        var shipper = await _repo.GetByIdAsync(id);
+        if (shipper is null) return null;
+
+        shipper.Name = dto.Name;
+        shipper.PhoneNumber = dto.PhoneNumber;
+
+        await _repo.UpdateAsync(shipper);
+        return ToDto(shipper);
+    }
+
     public async Task<ShipperResponseDto?> UpdateAsync(int id, UpdateShipperDto dto)
     {
         var shipper = await _repo.GetByIdAsync(id);
@@ -83,6 +95,30 @@ public class ShipperServiceImpl : IShipperService
 
     public Task<bool> DeleteAsync(int id)
         => _repo.DeleteAsync(id);
+
+    public async Task<ShipperReview> CreateReviewAsync(int userId, CreateShipperReviewDto dto)
+    {
+        var review = new ShipperReview
+        {
+            ShipperId = dto.ShipperId,
+            UserId = userId,
+            OrderId = dto.OrderId,
+            Rating = dto.Rating,
+            Comment = dto.Comment
+        };
+        return await _repo.CreateReviewAsync(review);
+    }
+
+    public async Task<ShipperRatingDto> GetRatingAsync(int shipperId)
+    {
+        var stats = await _repo.GetRatingStatsAsync(shipperId);
+        return new ShipperRatingDto
+        {
+            ShipperId = shipperId,
+            AverageRating = stats.Average,
+            TotalReviews = stats.Total
+        };
+    }
 
     // ══════════════════════════════════════════
     // PRIVATE HELPERS
@@ -117,6 +153,7 @@ public class ShipperServiceImpl : IShipperService
         Id = s.Id,
         Name = s.Name,
         Email = s.Email,
+        PhoneNumber = s.PhoneNumber,
         CreatedAt = s.CreatedAt,
     };
 }

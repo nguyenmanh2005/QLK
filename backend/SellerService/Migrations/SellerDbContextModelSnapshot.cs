@@ -54,6 +54,9 @@ namespace SellerService.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime?>("QrApprovedAt")
                         .HasColumnType("datetime2");
 

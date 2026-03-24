@@ -34,8 +34,33 @@ public class AuthController : ControllerBase
         return shipper is null ? NotFound() : Ok(shipper);
     }
 
+    [HttpPut("profile")]
+    [Microsoft.AspNetCore.Authorization.Authorize]
+    public async Task<IActionResult> UpdateProfile(UpdateProfileDto dto)
+    {
+        var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.NameIdentifier);
+        if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+            return Unauthorized();
+
+        var updated = await _service.UpdateProfileAsync(userId, dto);
+        return updated is null ? NotFound() : Ok(updated);
+    }
+
     [HttpPut("{id}")]
+    [Microsoft.AspNetCore.Authorization.Authorize]
     public async Task<IActionResult> Update(int id, UpdateShipperDto dto)
+    {
+        var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.NameIdentifier);
+        if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int currentUserId) || currentUserId != id)
+            return Unauthorized("Bạn chỉ có quyền sửa thông tin của chính mình.");
+
+        var updated = await _service.UpdateAsync(id, dto);
+        return updated is null ? NotFound() : Ok(updated);
+    }
+
+    [HttpPut("admin/update/{id}")]
+    [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin")]
+    public async Task<IActionResult> AdminUpdate(int id, UpdateShipperDto dto)
     {
         var updated = await _service.UpdateAsync(id, dto);
         return updated is null ? NotFound() : Ok(updated);

@@ -70,4 +70,30 @@ public class ReviewService : IReviewService
         ImageUrl  = r.ImageUrl,
         CreatedAt = r.CreatedAt,
     };
+
+    public async Task<SellerRatingDto> GetSellerRatingAsync(int sellerId)
+    {
+        var products = await _productRepo.GetAllAsync();
+        var sellerProducts = products.Where(p => p.SellerId == sellerId).Select(p => p.Id).ToList();
+
+        if (!sellerProducts.Any())
+            return new SellerRatingDto { SellerId = sellerId, AverageRating = 0, TotalReviews = 0 };
+
+        var allReviews = new List<Review>();
+        foreach (var pId in sellerProducts)
+        {
+            var r = await _repo.GetByProductIdAsync(pId);
+            allReviews.AddRange(r);
+        }
+
+        if (!allReviews.Any())
+            return new SellerRatingDto { SellerId = sellerId, AverageRating = 0, TotalReviews = 0 };
+
+        return new SellerRatingDto
+        {
+            SellerId = sellerId,
+            AverageRating = allReviews.Average(r => r.Rating),
+            TotalReviews = allReviews.Count
+        };
+    }
 }

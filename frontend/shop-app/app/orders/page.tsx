@@ -9,6 +9,7 @@ import {
 import { orderService, reviewService, useAuth, Providers, type Order, type Review } from '@/components/providers'
 import { Navbar } from '@/components/navbar'
 import { ReviewForm } from '@/components/review-form'
+import { ShipperReviewForm } from '@/components/shipper-review-form'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 
@@ -142,6 +143,47 @@ function ReviewSection({ order }: { order: Order }) {
       >
         <Star className="h-3.5 w-3.5" />
         Đánh giá sản phẩm
+      </button>
+    </div>
+  )
+}
+
+function ShipperReviewSection({ order }: { order: Order }) {
+  const [showForm, setShowForm] = useState(false)
+  const [doneReview, setDoneReview] = useState(false) // Giả định thôi. Backend ShipperReviews chưa có endpoint GetByOrderId. Cách tốt nhất là cho User đánh giá lại nếu ấn form.
+  
+  if (order.status !== 'Delivered' || !order.shipperId) return null
+
+  if (doneReview) {
+    return (
+      <div className="mt-4 flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3">
+        <Star className="h-4 w-4 fill-blue-500 text-blue-500" />
+        <span className="text-sm font-medium text-blue-800">Cảm ơn bạn đã đánh giá Tài xế!</span>
+      </div>
+    )
+  }
+
+  if (showForm) {
+    return (
+      <ShipperReviewForm
+        shipperId={order.shipperId}
+        orderId={order.id}
+        onSuccess={() => {
+          setDoneReview(true)
+          setShowForm(false)
+        }}
+      />
+    )
+  }
+
+  return (
+    <div className="mt-4 flex justify-end pb-2 border-b border-border/50">
+      <button
+        onClick={() => setShowForm(true)}
+        className="inline-flex items-center gap-1.5 rounded-full border border-blue-400/60 bg-blue-50 px-4 py-2 text-xs font-medium text-blue-700 hover:bg-blue-100 transition-colors"
+      >
+        <Truck className="h-3.5 w-3.5" />
+        Đánh giá Shipper
       </button>
     </div>
   )
@@ -389,12 +431,28 @@ function OrdersContent() {
                     <p className="text-sm text-muted-foreground">Số lượng: {order.quantity}</p>
                   </div>
                 </div>
+                
+                {/* Shipper Info link */}
+                {order.shipperId && (
+                  <div className="mt-4 flex items-center justify-between rounded-lg border border-blue-100 bg-blue-50/50 p-3">
+                    <div className="flex items-center gap-2">
+                      <Truck className="h-4 w-4 text-blue-600" />
+                      <span className="text-sm font-medium text-blue-900">Đơn vị vận chuyển đối tác</span>
+                    </div>
+                    <Link href={`/shipper/${order.shipperId}`} className="text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline">
+                      Xem hồ sơ tài xế &rarr;
+                    </Link>
+                  </div>
+                )}
 
                 {/* Timeline */}
                 <OrderTimeline status={order.status} />
 
                 {/* Cancel — chỉ hiện khi Pending hoặc Packing */}
                 <CancelButton order={order} onCancelled={handleOrderCancelled} />
+
+                {/* Shipper Review */}
+                <ShipperReviewSection order={order} />
 
                 {/* Review — chỉ hiện khi Delivered */}
                 <ReviewSection order={order} />

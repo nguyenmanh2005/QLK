@@ -57,4 +57,12 @@ public class ReviewsController : ControllerBase
 
         return Ok(new { imageUrl = $"/uploads/{fileName}" });
     }
+
+    // GET api/reviews/seller/{sellerId}/rating
+    [HttpGet("seller/{sellerId}/rating")]
+    public async Task<IActionResult> GetSellerRating(int sellerId)
+    {
+        var rating = await _service.GetSellerRatingAsync(sellerId);
+        return Ok(rating);
+    }
 }
