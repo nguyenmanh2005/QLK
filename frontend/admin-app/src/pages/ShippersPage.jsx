@@ -7,13 +7,20 @@ import toast from 'react-hot-toast';
 
 const ShipperModal = ({ isOpen, onClose, onSaved, editShipper }) => {
   const isEdit = !!editShipper;
-  const [form, setForm]       = useState({ name: '', email: '', password: '' });
+  const [form, setForm]       = useState({ name: '', email: '', password: '', phoneNumber: '', latitude: '', longitude: '' });
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     setForm(editShipper
-      ? { name: editShipper.name, email: editShipper.email, password: '' }
-      : { name: '', email: '', password: '' }
+      ? { 
+          name: editShipper.name, 
+          email: editShipper.email, 
+          password: '', 
+          phoneNumber: editShipper.phoneNumber || '', 
+          latitude: editShipper.latitude || '', 
+          longitude: editShipper.longitude || '' 
+        }
+      : { name: '', email: '', password: '', phoneNumber: '', latitude: '', longitude: '' }
     );
   }, [editShipper, isOpen]);
 
@@ -22,7 +29,13 @@ const ShipperModal = ({ isOpen, onClose, onSaved, editShipper }) => {
     setLoading(true);
     try {
       if (isEdit) {
-        const data = { name: form.name, email: form.email };
+        const data = { 
+          name: form.name, 
+          email: form.email, 
+          phoneNumber: form.phoneNumber,
+          latitude: form.latitude ? parseFloat(form.latitude) : null,
+          longitude: form.longitude ? parseFloat(form.longitude) : null
+        };
         if (form.password) data.password = form.password;
         await shipperService.update(editShipper.id, data);
         toast.success('Cập nhật thành công!');
@@ -52,6 +65,20 @@ const ShipperModal = ({ isOpen, onClose, onSaved, editShipper }) => {
             value={form.password} required={!isEdit}
             onChange={e => setForm(f => ({ ...f, password: e.target.value }))} />
         </FormField>
+        <FormField label="Số điện thoại">
+          <input className="input-field" placeholder="03xxxx" value={form.phoneNumber}
+            onChange={e => setForm(f => ({ ...f, phoneNumber: e.target.value }))} />
+        </FormField>
+        <div className="grid grid-cols-2 gap-4">
+          <FormField label="Vĩ độ (Lat)">
+            <input type="number" step="any" className="input-field" placeholder="10.xxx" value={form.latitude}
+              onChange={e => setForm(f => ({ ...f, latitude: e.target.value }))} />
+          </FormField>
+          <FormField label="Kinh độ (Lng)">
+            <input type="number" step="any" className="input-field" placeholder="106.xxx" value={form.longitude}
+              onChange={e => setForm(f => ({ ...f, longitude: e.target.value }))} />
+          </FormField>
+        </div>
         <div className="flex gap-3 justify-end pt-2">
           <button type="button" onClick={onClose} className="btn-secondary">Hủy</button>
           <button type="submit" disabled={loading} className="btn-primary">

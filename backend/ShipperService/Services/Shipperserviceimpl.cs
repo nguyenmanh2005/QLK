@@ -73,6 +73,8 @@ public class ShipperServiceImpl : IShipperService
 
         shipper.Name = dto.Name;
         shipper.PhoneNumber = dto.PhoneNumber;
+        if (dto.Latitude.HasValue) shipper.Latitude = dto.Latitude.Value;
+        if (dto.Longitude.HasValue) shipper.Longitude = dto.Longitude.Value;
 
         await _repo.UpdateAsync(shipper);
         return ToDto(shipper);
@@ -85,6 +87,9 @@ public class ShipperServiceImpl : IShipperService
 
         shipper.Name = dto.Name;
         shipper.Email = dto.Email;
+        shipper.PhoneNumber = dto.PhoneNumber;
+        if (dto.Latitude.HasValue) shipper.Latitude = dto.Latitude.Value;
+        if (dto.Longitude.HasValue) shipper.Longitude = dto.Longitude.Value;
 
         if (!string.IsNullOrEmpty(dto.Password))
             shipper.Password = BCrypt.Net.BCrypt.HashPassword(dto.Password);
@@ -118,6 +123,18 @@ public class ShipperServiceImpl : IShipperService
             AverageRating = stats.Average,
             TotalReviews = stats.Total
         };
+    }
+
+    public async Task<ShipperResponseDto?> UpdateLocationAsync(int id, UpdateLocationDto dto)
+    {
+        var shipper = await _repo.GetByIdAsync(id);
+        if (shipper is null) return null;
+
+        shipper.Latitude = dto.Latitude;
+        shipper.Longitude = dto.Longitude;
+
+        await _repo.UpdateAsync(shipper);
+        return ToDto(shipper);
     }
 
     // ══════════════════════════════════════════
@@ -154,6 +171,8 @@ public class ShipperServiceImpl : IShipperService
         Name = s.Name,
         Email = s.Email,
         PhoneNumber = s.PhoneNumber,
+        Latitude = s.Latitude,
+        Longitude = s.Longitude,
         CreatedAt = s.CreatedAt,
     };
 }

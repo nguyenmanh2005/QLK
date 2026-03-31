@@ -66,6 +66,8 @@ public class UserService : IUserService
 
         user.Name = dto.Name;
         user.PhoneNumber = dto.PhoneNumber;
+        if (dto.Latitude.HasValue) user.Latitude = dto.Latitude.Value;
+        if (dto.Longitude.HasValue) user.Longitude = dto.Longitude.Value;
 
         var updated = await _repo.UpdateProfileAsync(id, user);
         return MapToResponse(updated!);
@@ -73,11 +75,18 @@ public class UserService : IUserService
 
     public async Task<UserResponseDto> UpdateAsync(int id, UpdateUserDto dto)
     {
-        var user = new User { Name = dto.Name, Email = dto.Email };
-        var updated = await _repo.UpdateAsync(id, user);
-        if (updated is null)
+        var user = await _repo.GetByIdAsync(id);
+        if (user is null)
             throw new NotFoundException($"Không tìm thấy user với Id = {id}");
-        return MapToResponse(updated);
+
+        user.Name = dto.Name;
+        user.Email = dto.Email;
+        user.PhoneNumber = dto.PhoneNumber;
+        if (dto.Latitude.HasValue) user.Latitude = dto.Latitude.Value;
+        if (dto.Longitude.HasValue) user.Longitude = dto.Longitude.Value;
+
+        var updated = await _repo.UpdateAsync(id, user);
+        return MapToResponse(updated!);
     }
 
     public async Task DeleteAsync(int id)
@@ -108,6 +117,8 @@ public class UserService : IUserService
         Name = user.Name,
         Email = user.Email,
         PhoneNumber = user.PhoneNumber,
+        Latitude = user.Latitude,
+        Longitude = user.Longitude,
         CreatedAt = user.CreatedAt
     };
 

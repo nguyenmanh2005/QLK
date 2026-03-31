@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Loader2, User as UserIcon, Edit2, Check, X } from 'lucide-react'
+import { ArrowLeft, Loader2, User as UserIcon, Edit2, Check, X, MapPin } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from 'sonner'
 import { userService, useAuth, Providers } from '@/components/providers'
@@ -11,13 +11,13 @@ function ProfileContent() {
   const { user, isAuth, loading: authLoading } = useAuth()
   const router = useRouter()
   
-  const [form, setForm] = useState({ name: '', phoneNumber: '' })
+  const [form, setForm] = useState({ name: '', phoneNumber: '', latitude: null as number | null, longitude: null as number | null })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
 
   // Lưu tạm dể có thể Hủy
-  const [originalForm, setOriginalForm] = useState({ name: '', phoneNumber: '' })
+  const [originalForm, setOriginalForm] = useState({ name: '', phoneNumber: '', latitude: null as number | null, longitude: null as number | null })
 
   useEffect(() => {
     if (authLoading) return
@@ -30,7 +30,9 @@ function ProfileContent() {
       .then((data) => {
         const loaded = {
           name: data.name || '',
-          phoneNumber: data.phoneNumber || ''
+          phoneNumber: data.phoneNumber || '',
+          latitude: data.latitude || null,
+          longitude: data.longitude || null
         }
         setForm(loaded)
         setOriginalForm(loaded)
@@ -135,6 +137,53 @@ function ProfileContent() {
               <div className="space-y-2 sm:col-span-2">
                 <label className="text-sm font-medium text-muted-foreground">Email</label>
                 <p className="text-base font-semibold">{user?.email}</p>
+              </div>
+
+              {/* Tọa độ Geolocation */}
+              <div className="space-y-2 sm:col-span-2">
+                <label className="text-sm font-medium text-muted-foreground">Vị trí giao hàng mặc định</label>
+                {isEditing ? (
+                  <div className="flex flex-wrap items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!navigator.geolocation) {
+                          toast.error('Trình duyệt không hỗ trợ vị trí')
+                          return
+                        }
+                        toast.loading('Đang lấy vị trí...', { id: 'geo' })
+                        navigator.geolocation.getCurrentPosition(
+                          (pos) => {
+                            setForm({ ...form, latitude: pos.coords.latitude, longitude: pos.coords.longitude })
+                            toast.success('Đã lấy tọa độ!', { id: 'geo' })
+                          },
+                          () => toast.error('Vui lòng cấp quyền vị trí trong trình duyệt', { id: 'geo' })
+                        )
+                      }}
+                      className="inline-flex items-center gap-2 rounded-md bg-blue-50 text-blue-600 px-4 py-2 text-sm font-medium hover:bg-blue-100 transition-colors border border-blue-200"
+                    >
+                      <MapPin className="h-4 w-4" />
+                      Định vị trí của tôi
+                    </button>
+                    {form.latitude && form.longitude ? (
+                      <span className="text-sm font-medium text-green-600">
+                        {form.latitude.toFixed(5)}, {form.longitude.toFixed(5)}
+                      </span>
+                    ) : (
+                      <span className="text-sm text-muted-foreground">Chưa có dữ liệu Bản đồ</span>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-base font-semibold">
+                    {form.latitude && form.longitude ? (
+                      <a href={`https://www.google.com/maps?q=${form.latitude},${form.longitude}`} target="_blank" className="text-blue-600 hover:underline inline-flex items-center gap-1">
+                        <MapPin className="h-4 w-4" /> Đã thiết lập ({form.latitude.toFixed(4)}, {form.longitude.toFixed(4)})
+                      </a>
+                    ) : (
+                      <span className="text-muted-foreground italic">Chưa thiết lập tọa độ giao hàng</span>
+                    )}
+                  </p>
+                )}
               </div>
             </div>
 

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Loader2, Store, Edit2, Check, X } from 'lucide-react'
+import { ArrowLeft, Loader2, Store, Edit2, Check, X, MapPin } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from 'sonner'
 import { sellerService, useAuth, Providers } from '@/components/providers'
@@ -11,11 +11,11 @@ function ProfileContent() {
   const { seller, isAuth, loading: authLoading } = useAuth()
   const router = useRouter()
   
-  const [form, setForm] = useState({ name: '', phoneNumber: '' })
+  const [form, setForm] = useState({ name: '', phoneNumber: '', latitude: null as number | null, longitude: null as number | null })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
-  const [originalForm, setOriginalForm] = useState({ name: '', phoneNumber: '' })
+  const [originalForm, setOriginalForm] = useState({ name: '', phoneNumber: '', latitude: null as number | null, longitude: null as number | null })
 
   useEffect(() => {
     if (authLoading) return
@@ -28,7 +28,9 @@ function ProfileContent() {
       .then((data) => {
         const loaded = {
           name: data?.name || '',
-          phoneNumber: data?.phoneNumber || ''
+          phoneNumber: data?.phoneNumber || '',
+          latitude: data?.latitude || null,
+          longitude: data?.longitude || null
         }
         setForm(loaded)
         setOriginalForm(loaded)
@@ -133,6 +135,53 @@ function ProfileContent() {
               <div className="space-y-2 sm:col-span-2">
                 <label className="text-sm font-medium text-slate-500">Email Cửa Hàng</label>
                 <p className="text-base font-semibold text-slate-900">{seller?.email}</p>
+              </div>
+
+              {/* Tọa độ Geolocation */}
+              <div className="space-y-2 sm:col-span-2">
+                <label className="text-sm font-medium text-slate-500">Vị trí Kho hàng (Dùng để Ship)</label>
+                {isEditing ? (
+                  <div className="flex flex-wrap items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!navigator.geolocation) {
+                          toast.error('Trình duyệt không hỗ trợ vị trí')
+                          return
+                        }
+                        toast.loading('Đang lấy vị trí...', { id: 'geo' })
+                        navigator.geolocation.getCurrentPosition(
+                          (pos) => {
+                            setForm({ ...form, latitude: pos.coords.latitude, longitude: pos.coords.longitude })
+                            toast.success('Đã lấy tọa độ Kho hàng!', { id: 'geo' })
+                          },
+                          () => toast.error('Vui lòng cấp quyền vị trí trong trình duyệt', { id: 'geo' })
+                        )
+                      }}
+                      className="inline-flex items-center gap-2 rounded-lg bg-indigo-50 text-indigo-700 px-4 py-2 text-sm font-medium hover:bg-indigo-100 transition-colors border border-indigo-200"
+                    >
+                      <MapPin className="h-4 w-4" />
+                      Lấy tọa độ Kho hàng hiện tại
+                    </button>
+                    {form.latitude && form.longitude ? (
+                      <span className="text-sm font-medium text-emerald-600">
+                        {form.latitude.toFixed(5)}, {form.longitude.toFixed(5)}
+                      </span>
+                    ) : (
+                      <span className="text-sm text-slate-500">Chưa có dữ liệu Bản đồ</span>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-base font-semibold">
+                    {form.latitude && form.longitude ? (
+                      <a href={`https://www.google.com/maps?q=${form.latitude},${form.longitude}`} target="_blank" className="text-indigo-600 hover:underline inline-flex items-center gap-1">
+                        <MapPin className="h-4 w-4" /> Đã thiết lập vị trí Kho
+                      </a>
+                    ) : (
+                      <span className="text-slate-400 italic">Chưa thiết lập tọa độ Kho hàng</span>
+                    )}
+                  </p>
+                )}
               </div>
             </div>
 

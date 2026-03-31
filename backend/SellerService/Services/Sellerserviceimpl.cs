@@ -73,6 +73,8 @@ public class SellerServiceImpl : ISellerService
 
         seller.Name = dto.Name;
         seller.PhoneNumber = dto.PhoneNumber;
+        if (dto.Latitude.HasValue) seller.Latitude = dto.Latitude.Value;
+        if (dto.Longitude.HasValue) seller.Longitude = dto.Longitude.Value;
 
         await _repo.UpdateAsync(seller);
         return ToDto(seller);
@@ -85,6 +87,9 @@ public class SellerServiceImpl : ISellerService
 
         seller.Name  = dto.Name;
         seller.Email = dto.Email;
+        seller.PhoneNumber = dto.PhoneNumber;
+        if (dto.Latitude.HasValue) seller.Latitude = dto.Latitude.Value;
+        if (dto.Longitude.HasValue) seller.Longitude = dto.Longitude.Value;
 
         if (!string.IsNullOrEmpty(dto.Password))
             seller.Password = BCrypt.Net.BCrypt.HashPassword(dto.Password);
@@ -132,6 +137,8 @@ public class SellerServiceImpl : ISellerService
         Email       = s.Email,
         CreatedAt   = s.CreatedAt,
         PhoneNumber = s.PhoneNumber,
+        Latitude    = s.Latitude,
+        Longitude   = s.Longitude,
         BankCode    = s.BankCode,
         AccountNo   = s.AccountNo,
         AccountName = s.AccountName,

@@ -1,34 +1,35 @@
   Determining projects to restore...
-  Restored d:\3\QLK\backend\Shared.Messages\Shared.Messages.csproj (in 417 ms).
-  Restored d:\3\QLK\backend\ApiGateway\ApiGateway.csproj (in 470 ms).
-  Restored d:\3\QLK\backend\CartService\CartService.csproj (in 470 ms).
-  Restored d:\3\QLK\backend\AdminService\AdminService.csproj (in 504 ms).
-  Restored d:\3\QLK\backend\OrderService\OrderService.csproj (in 505 ms).
-  Restored d:\3\QLK\backend\ProductService\ProductService.csproj (in 505 ms).
-  3 of 9 projects are up-to-date for restore.
-d:\3\QLK\backend\ShipperService\Program.cs(11,7): warning CS0105: The using directive for 'ShipperService.Repositories' appeared previously in this namespace [d:\3\QLK\backend\ShipperService\ShipperService.csproj]
-d:\3\QLK\backend\ShipperService\Program.cs(12,7): warning CS0105: The using directive for 'ShipperService.Services' appeared previously in this namespace [d:\3\QLK\backend\ShipperService\ShipperService.csproj]
+  Restored d:\3\QLK\backend\Shared.Messages\Shared.Messages.csproj (in 247 ms).
+  Restored d:\3\QLK\backend\ApiGateway\ApiGateway.csproj (in 286 ms).
+  Restored d:\3\QLK\backend\CartService\CartService.csproj (in 286 ms).
+  Restored d:\3\QLK\backend\ShipperService\ShipperService.csproj (in 327 ms).
+  Restored d:\3\QLK\backend\AdminService\AdminService.csproj (in 327 ms).
+  Restored d:\3\QLK\backend\ProductService\ProductService.csproj (in 339 ms).
+  Restored d:\3\QLK\backend\OrderService\OrderService.csproj (in 339 ms).
+  2 of 9 projects are up-to-date for restore.
   Shared.Messages -> d:\3\QLK\backend\Shared.Messages\bin\Debug\net8.0\Shared.Messages.dll
-  ShipperService -> d:\3\QLK\backend\ShipperService\bin\Debug\net8.0\ShipperService.dll
-  CartService -> d:\3\QLK\backend\CartService\bin\Debug\net8.0\CartService.dll
-  UserService -> d:\3\QLK\backend\UserService\bin\Debug\net8.0\UserService.dll
-  AdminService -> d:\3\QLK\backend\AdminService\bin\Debug\net8.0\AdminService.dll
 d:\3\QLK\backend\SellerService\Program.cs(8,7): warning CS0105: The using directive for 'SellerService.Repositories' appeared previously in this namespace [d:\3\QLK\backend\SellerService\SellerService.csproj]
 d:\3\QLK\backend\SellerService\Program.cs(9,7): warning CS0105: The using directive for 'SellerService.Services' appeared previously in this namespace [d:\3\QLK\backend\SellerService\SellerService.csproj]
-  ApiGateway -> d:\3\QLK\backend\ApiGateway\bin\Debug\net8.0\ApiGateway.dll
+d:\3\QLK\backend\ShipperService\Program.cs(11,7): warning CS0105: The using directive for 'ShipperService.Repositories' appeared previously in this namespace [d:\3\QLK\backend\ShipperService\ShipperService.csproj]
+d:\3\QLK\backend\ShipperService\Program.cs(12,7): warning CS0105: The using directive for 'ShipperService.Services' appeared previously in this namespace [d:\3\QLK\backend\ShipperService\ShipperService.csproj]
+  CartService -> d:\3\QLK\backend\CartService\bin\Debug\net8.0\CartService.dll
+  UserService -> d:\3\QLK\backend\UserService\bin\Debug\net8.0\UserService.dll
   SellerService -> d:\3\QLK\backend\SellerService\bin\Debug\net8.0\SellerService.dll
+  AdminService -> d:\3\QLK\backend\AdminService\bin\Debug\net8.0\AdminService.dll
+  ApiGateway -> d:\3\QLK\backend\ApiGateway\bin\Debug\net8.0\ApiGateway.dll
+  ShipperService -> d:\3\QLK\backend\ShipperService\bin\Debug\net8.0\ShipperService.dll
 d:\3\QLK\backend\ProductService\Program.cs(15,7): warning CS0105: The using directive for 'ProductService.Services' appeared previously in this namespace [d:\3\QLK\backend\ProductService\ProductService.csproj]
   OrderService -> d:\3\QLK\backend\OrderService\bin\Debug\net8.0\OrderService.dll
   ProductService -> d:\3\QLK\backend\ProductService\bin\Debug\net8.0\ProductService.dll
 
 Build succeeded.
 
-d:\3\QLK\backend\ShipperService\Program.cs(11,7): warning CS0105: The using directive for 'ShipperService.Repositories' appeared previously in this namespace [d:\3\QLK\backend\ShipperService\ShipperService.csproj]
-d:\3\QLK\backend\ShipperService\Program.cs(12,7): warning CS0105: The using directive for 'ShipperService.Services' appeared previously in this namespace [d:\3\QLK\backend\ShipperService\ShipperService.csproj]
 d:\3\QLK\backend\SellerService\Program.cs(8,7): warning CS0105: The using directive for 'SellerService.Repositories' appeared previously in this namespace [d:\3\QLK\backend\SellerService\SellerService.csproj]
 d:\3\QLK\backend\SellerService\Program.cs(9,7): warning CS0105: The using directive for 'SellerService.Services' appeared previously in this namespace [d:\3\QLK\backend\SellerService\SellerService.csproj]
+d:\3\QLK\backend\ShipperService\Program.cs(11,7): warning CS0105: The using directive for 'ShipperService.Repositories' appeared previously in this namespace [d:\3\QLK\backend\ShipperService\ShipperService.csproj]
+d:\3\QLK\backend\ShipperService\Program.cs(12,7): warning CS0105: The using directive for 'ShipperService.Services' appeared previously in this namespace [d:\3\QLK\backend\ShipperService\ShipperService.csproj]
 d:\3\QLK\backend\ProductService\Program.cs(15,7): warning CS0105: The using directive for 'ProductService.Services' appeared previously in this namespace [d:\3\QLK\backend\ProductService\ProductService.csproj]
     5 Warning(s)
     0 Error(s)
 
-Time Elapsed 00:00:10.98
+Time Elapsed 00:00:06.27

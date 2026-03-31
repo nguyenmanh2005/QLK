@@ -13,4 +13,5 @@ public interface IShipperService
     Task<bool> DeleteAsync(int id);
     Task<Models.ShipperReview> CreateReviewAsync(int userId, CreateShipperReviewDto dto);
     Task<ShipperRatingDto> GetRatingAsync(int shipperId);
+    Task<ShipperResponseDto?> UpdateLocationAsync(int id, UpdateLocationDto dto);
 }

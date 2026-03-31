@@ -10,6 +10,7 @@ import { orderService, reviewService, useAuth, Providers, type Order, type Revie
 import { Navbar } from '@/components/navbar'
 import { ReviewForm } from '@/components/review-form'
 import { ShipperReviewForm } from '@/components/shipper-review-form'
+import { OrderTracker } from '@/components/OrderTracker'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 
@@ -443,6 +444,16 @@ function OrdersContent() {
                       Xem hồ sơ tài xế &rarr;
                     </Link>
                   </div>
+                )}
+
+                {/* Map Tracker - chỉ hiện nếu có SellerId và UserId */}
+                {order.product?.sellerId && order.userId && (order.status === 'Shipping' || order.status === 'Delivered' || order.status === 'Packing') && (
+                  <OrderTracker 
+                    orderId={order.id} 
+                    sellerId={order.product.sellerId} 
+                    shipperId={order.shipperId} 
+                    userId={order.userId} 
+                  />
                 )}
 
                 {/* Timeline */}
