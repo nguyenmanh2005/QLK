@@ -26,7 +26,7 @@ Sử dụng kiến trúc Micro-frontends/BFF, ứng dụng được chia thành 
 ## 🚀 Hướng Dẫn Khởi Chạy
 
 ### A. Chuẩn bị môi trường nền tảng
-Hệ thống yêu cầu bắt buộc phải có Message Queue hỗ trợ phía sau. Hãy đảm bảo chạy lệnh sau tại thư mục gốc của dự án (`d:\3\QLK`) để mở dịch vụ **RabbitMQ**:
+Hệ thống yêu cầu bắt buộc phải có Message Queue hỗ trợ phía sau. Hãy đảm bảo chạy lệnh sau tại thư mục gốc của dự án (`đường dẫn đến dự án ví dụ: D:/`) để mở dịch vụ **RabbitMQ**:
 ```bash
 docker compose up -d
 ```
